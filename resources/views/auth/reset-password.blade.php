@@ -1,4 +1,7 @@
-<x-guest-layout>
+<x-guest-layout
+    :backgroundImage="asset('images/background-login.png')"
+    :sideImage="asset('images/Reset-password.png')"
+>
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 
