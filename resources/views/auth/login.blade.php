@@ -16,8 +16,8 @@
             <div class="w-full md:w-1/2 p-8 md:p-14">
                 <!-- Logo -->
                 <div class="mb-6 flex items-center space-x">
-                    <img src="{{ asset('images/logo.png') }}" alt="CookEase Logo" class="h-8 w-12">
-                    <span class="text-xl font-semibold text-gray-800">CookEase</span>
+                    <img src="{{ asset('images/logo.png') }}" alt="CookEase Logo" class="h-10 w-auto">
+                    <span class="text-xl font-bold text-gray-800">CookEase</span>
                 </div>
 
                 <!-- Welcome Message -->
@@ -65,9 +65,8 @@
                         </button>
                     </div>
 
-                    <div class="text-center mt-6 text-sm">
-                        No have an account?
-                        <a href="{{ route('register') }}" class="text-indigo-600 font-medium hover:underline">Create New</a>
+                    <div class="text-center mt-6">
+                        <a href="{{ route('register') }}" class="border font-medium rounded-lg text-xs px-5 py-2.5">No have an account? Create New</a>
                     </div>
                 </form>
             </div>
