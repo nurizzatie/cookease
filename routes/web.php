@@ -1,7 +1,15 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SocialAuthController; // <-- Make sure this is added
 use Illuminate\Support\Facades\Route;
+
+// Google and Facebook OAuth routes
+Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+
+Route::get('auth/facebook', [SocialAuthController::class, 'redirectToFacebook']);
+Route::get('auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback']);
 
 Route::get('/', function () {
     return redirect()->route('login');
