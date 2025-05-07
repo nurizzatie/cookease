@@ -11,34 +11,41 @@ class IngredientController extends Controller
 {
     public function getIngredients()
     {
+        // Get all ingredient names from database
         $ingredients = DB::table('ingredients')->pluck('name');
         return response()->json($ingredients);
     }
 
     public function process(Request $request)
     {
+        // ✅ Validate incoming request
         $validated = $request->validate([
-            'ingredients' => 'required|string',
-            'filters' => 'array',
-            'cooking_time' => 'nullable|string',
-            'budget' => 'nullable|string',
+            'ingredients'   => 'required|string',
+            'filters'       => 'array',
+            'cooking_time'  => 'nullable|string',
+            'budget'        => 'nullable|string',
         ]);
 
-        // Log raw incoming data for debugging
-        \Log::info('Incoming ingredients raw:', ['raw' => $validated['ingredients']]);
+        // ✅ Log raw input from Tagify for debugging
+        Log::info('Incoming ingredients raw:', ['raw' => $validated['ingredients']]);
 
-        // Decode JSON array from Tagify input + strip emojis
+        // ✅ Decode JSON input and remove emojis (if any)
         $ingredientsInput = collect(json_decode($validated['ingredients'], true))
             ->pluck('value')
             ->map(function ($item) {
+                // Remove leading emojis + space (if present)
                 return preg_replace('/^[^\w\s]+ /u', '', $item);
             })
             ->toArray();
 
-        \Log::info('Processed ingredients array:', ['array' => $ingredientsInput]);
+        Log::info('Cleaned ingredients array:', ['array' => $ingredientsInput]);
 
-        $allowedIngredients = DB::table('ingredients')->pluck('name')->map(fn($n) => strtolower($n))->toArray();
+        // ✅ Load allowed ingredient names from database (lowercased)
+        $allowedIngredients = DB::table('ingredients')->pluck('name')
+            ->map(fn($n) => strtolower($n))
+            ->toArray();
 
+        // ✅ Validate each input ingredient
         $cleanedIngredients = [];
         foreach ($ingredientsInput as $ingredient) {
             $ingredient = trim(strtolower($ingredient));
@@ -48,10 +55,11 @@ class IngredientController extends Controller
             $cleanedIngredients[] = $ingredient;
         }
 
+        // ✅ Prepare data for API call
         $ingredients = implode(', ', $cleanedIngredients);
-        $filters = $validated['filters'] ?? [];
+        $filters     = $validated['filters'] ?? [];
         $cookingTime = $validated['cooking_time'] ?? '';
-        $budget = $validated['budget'] ?? '';
+        $budget      = $validated['budget'] ?? '';
 
         $apiKey = config('services.groq.key');
 
@@ -60,26 +68,24 @@ class IngredientController extends Controller
             return back()->with('message', 'AI service is currently unavailable. Please contact the admin.');
         }
 
-        // Build dynamic prompt
+        // ✅ Build AI prompt
         $filterText = implode(', ', $filters);
         $prompt = "Generate 3 Malaysian recipes using: $ingredients";
-        if ($filterText)
-            $prompt .= ", preferences: $filterText";
-        if ($cookingTime)
-            $prompt .= ", cooking time: $cookingTime";
-        if ($budget)
-            $prompt .= ", budget: $budget";
+        if ($filterText)   $prompt .= ", preferences: $filterText";
+        if ($cookingTime)  $prompt .= ", cooking time: $cookingTime";
+        if ($budget)       $prompt .= ", budget: $budget";
 
         try {
+            // ✅ Make API call to Groq
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
+                'Content-Type'  => 'application/json',
             ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                        'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
-                        'messages' => [
-                            ['role' => 'user', 'content' => $prompt],
-                        ],
-                    ]);
+                'model'    => 'meta-llama/llama-4-scout-17b-16e-instruct',
+                'messages' => [
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
 
             $json = $response->json();
 
@@ -88,8 +94,9 @@ class IngredientController extends Controller
                 return back()->with('message', 'Failed to generate recipe: ' . $json['error']['message']);
             }
 
+            // ✅ Process AI response
             $aiContent = $json['choices'][0]['message']['content'] ?? 'No recipes found.';
-            $recipes = explode("\n\n", $aiContent);
+            $recipes   = explode("\n\n", $aiContent);
 
             return view('generate-results', compact('ingredients', 'recipes'));
 
