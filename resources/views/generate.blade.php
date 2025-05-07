@@ -182,9 +182,9 @@
             cinnamon: '🌿 cinnamon', 'star anise': '🌿 star anise', cloves: '🌿 cloves',
             'kaffir lime leaves': '🌿 kaffir lime leaves', 'pandan leaves': '🌿 pandan leaves',
             'curry leaves': '🌿 curry leaves', belacan: '🦐 belacan', rice: '🍚 rice',
-            'coconut milk': '🥥 coconut milk', chili: '🌶️ chili', tamarind: '🌰 tamarind',
+            'coconut milk': '🥥 coconut milk', chili: '🔥 chili', tamarind: '🌰 tamarind',
             'soy sauce': '🍶 soy sauce', 'oyster sauce': '🍶 oyster sauce', 'fish sauce': '🍶 fish sauce',
-            'palm sugar': '🍯 palm sugar', vinegar: '🍶 vinegar', sambal: '🌶️ sambal', peanuts: '🥜 peanuts',
+            'palm sugar': '🍯 palm sugar', vinegar: '🍶 vinegar', sambal: '🔥 sambal', peanuts: '🥜 peanuts',
             coconut: '🥥 coconut', 'vermicelli noodles': '🍜 vermicelli noodles', 'yellow noodles': '🍜 yellow noodles',
             'rice noodles': '🍜 rice noodles', 'glutinous rice': '🍚 glutinous rice', roti: '🥞 roti', tomato: '🍅 tomato'
         };
