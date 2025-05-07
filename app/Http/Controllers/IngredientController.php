@@ -25,16 +25,19 @@ class IngredientController extends Controller
         ]);
 
         // Log raw incoming data for debugging
-    \Log::info('Incoming ingredients raw:', ['raw' => $validated['ingredients']]);
- // Decode JSON array from Tagify input
- $ingredientsInput = collect(json_decode($validated['ingredients'], true))
- ->pluck('value')
- ->toArray();
+        \Log::info('Incoming ingredients raw:', ['raw' => $validated['ingredients']]);
 
-\Log::info('Processed ingredients array:', ['array' => $ingredientsInput]);
+        // Decode JSON array from Tagify input + strip emojis
+        $ingredientsInput = collect(json_decode($validated['ingredients'], true))
+            ->pluck('value')
+            ->map(function ($item) {
+                return preg_replace('/^[^\w\s]+ /u', '', $item);
+            })
+            ->toArray();
 
+        \Log::info('Processed ingredients array:', ['array' => $ingredientsInput]);
 
-    $allowedIngredients = DB::table('ingredients')->pluck('name')->map(fn($n) => strtolower($n))->toArray();
+        $allowedIngredients = DB::table('ingredients')->pluck('name')->map(fn($n) => strtolower($n))->toArray();
 
         $cleanedIngredients = [];
         foreach ($ingredientsInput as $ingredient) {
@@ -60,20 +63,23 @@ class IngredientController extends Controller
         // Build dynamic prompt
         $filterText = implode(', ', $filters);
         $prompt = "Generate 3 Malaysian recipes using: $ingredients";
-        if ($filterText) $prompt .= ", preferences: $filterText";
-        if ($cookingTime) $prompt .= ", cooking time: $cookingTime";
-        if ($budget) $prompt .= ", budget: $budget";
+        if ($filterText)
+            $prompt .= ", preferences: $filterText";
+        if ($cookingTime)
+            $prompt .= ", cooking time: $cookingTime";
+        if ($budget)
+            $prompt .= ", budget: $budget";
 
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
             ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
-                'messages' => [
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-            ]);
+                        'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
+                        'messages' => [
+                            ['role' => 'user', 'content' => $prompt],
+                        ],
+                    ]);
 
             $json = $response->json();
 
