@@ -50,7 +50,8 @@ class BMIController extends Controller
     $bmi->bmi_value = round($request->weight / pow($request->height / 100, 2), 2);
     $bmi->save();
 
-    return redirect()->back()->with('success', 'BMI updated successfully.');
+    return redirect()->back()->with('status', 'bmi-updated');
+
 }
 
 }

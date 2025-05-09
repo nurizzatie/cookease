@@ -45,4 +45,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function bmi()
+{
+    return $this->hasOne(Bmi::class);
 }
+
+}
+

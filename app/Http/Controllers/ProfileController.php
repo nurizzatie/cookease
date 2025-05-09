@@ -18,9 +18,13 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+    $bmi = $user->bmi; // assumes User model has a `bmi()` relationship
+
+    return view('profile.edit', [
+        'user' => $user,
+        'bmi' => $bmi,
+    ]);
     }
 
     /**

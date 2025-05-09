@@ -25,7 +25,7 @@
     <!-- Edit Mode -->
     <form x-show="editing" x-cloak method="POST" action="{{ route('bmi.update') }}" class="mt-6 space-y-6">
         @csrf
-        @method('put')
+        @method('post')
 
         <div>
             <x-input-label for="age" :value="__('Age')" />
