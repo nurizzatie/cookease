@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bmi;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+
 
 class ProfileController extends Controller
 {
@@ -57,4 +59,12 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function modify(Request $request): View
+{
+    $user = $request->user();
+    $bmi = $user->bmi; // include BMI relationship
+
+    return view('profile.edit', compact('user', 'bmi'));
+}
 }
