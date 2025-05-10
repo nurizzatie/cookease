@@ -35,6 +35,14 @@ Route::get('/test-filters', function () {
     return view('test-filters');
 });
 
+Route::get('/recipe-detail/{index}', function ($index) {
+    $recipes = session('generated_recipes', []);
+    if (!isset($recipes[$index])) {
+        abort(404);
+    }
+    return view('recipe-detail', ['recipe' => $recipes[$index]]);
+})->name('recipe.detail');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

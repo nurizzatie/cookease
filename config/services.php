@@ -51,5 +51,8 @@ return [
         'key' => env('GROQ_API_KEY'),
     ],
 
+    'pixabay' => [
+        'key' => env('PIXABAY_API_KEY'),
+    ],
 
 ];

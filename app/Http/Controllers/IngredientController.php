@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class IngredientController extends Controller
 {
@@ -69,11 +70,44 @@ class IngredientController extends Controller
         }
 
         // ✅ Build AI prompt
+        $user = auth()->user();
+        $bmiRecord = $user->bmi; // assuming one-to-one
+        $bmiValue = $bmiRecord ? $bmiRecord->getBmiAttribute() : null;
+
+        $bmiCategory = 'normal';
+
+        if ($bmiValue) {
+            if ($bmiValue < 18.5) $bmiCategory = 'underweight';
+            elseif ($bmiValue >= 25) $bmiCategory = 'overweight';
+            elseif ($bmiValue >= 30) $bmiCategory = 'obese';
+        }
+
         $filterText = implode(', ', $filters);
-        $prompt = "Generate 3 Malaysian recipes using: $ingredients";
-        if ($filterText)   $prompt .= ", preferences: $filterText";
-        if ($cookingTime)  $prompt .= ", cooking time: $cookingTime";
-        if ($budget)       $prompt .= ", budget: $budget";
+
+        $extraInfo = '';
+        if ($filterText)   $extraInfo .= " Take into account these preferences: $filterText.";
+        if ($cookingTime)  $extraInfo .= " Try to keep the cooking time around $cookingTime.";
+        if ($budget)       $extraInfo .= " Ensure the recipes fit a $budget budget.";
+        if ($bmiValue)     $extraInfo .= " The user has a BMI of $bmiValue ($bmiCategory), so recommend recipes that support a healthy diet for this condition.";
+
+        $prompt = <<<PROMPT
+Generate 12 Malaysian recipes using the following ingredients: $ingredients.$extraInfo
+
+Each recipe must be in **JSON format** and include:
+- name (string)
+- description (string)
+- duration (string, e.g. "30 minutes")
+- servings (number)
+- difficulty (easy/medium/hard)
+- calories (estimated total per recipe in kcal)
+- image (use any placeholder or leave blank — image will be fetched separately)
+- ingredients (array of strings, give detail ingredient's measurement)
+- groceryLists (array of strings, ingredient without measurement for grocery shopping list)
+- instructions (string, give detail instruction)
+
+Return **only a JSON array** of recipe objects. Do not include any explanation or introduction text.
+PROMPT;
+
 
         try {
             // ✅ Make API call to Groq
@@ -95,14 +129,58 @@ class IngredientController extends Controller
             }
 
             // ✅ Process AI response
-            $aiContent = $json['choices'][0]['message']['content'] ?? 'No recipes found.';
-            $recipes   = explode("\n\n", $aiContent);
+            $aiContent = $json['choices'][0]['message']['content'] ?? null;
 
+            Log::info('Groq AI Response:', ['content' => $aiContent]);
+
+            try {
+                // Strip Markdown-style ```json block if present
+                $aiContent = trim($aiContent);
+                if (str_starts_with($aiContent, '```json')) {
+                    $aiContent = preg_replace('/^```json\s*/', '', $aiContent); // remove starting ```json
+                    $aiContent = preg_replace('/```$/', '', $aiContent);        // remove ending ```
+                    $aiContent = trim($aiContent);
+                }
+
+                // Try decoding cleaned JSON
+                $recipes = json_decode($aiContent, true);
+                if (!is_array($recipes)) {
+                    throw new \Exception('Decoded result is not an array.');
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to decode AI JSON: ' . $e->getMessage());
+                return back()->with('message', 'AI did not return usable recipe data.');
+            }
+
+            // ✅ Add real image to each recipe from Pixabay
+            foreach ($recipes as &$recipe) {
+                $recipe['image'] = $this->getImageFromPixabay($recipe['name']);
+            }
+
+            session(['generated_recipes' => $recipes]);
             return view('generate-results', compact('ingredients', 'recipes'));
 
         } catch (\Exception $e) {
             Log::error('Groq API exception: ' . $e->getMessage());
             return back()->with('message', 'An error occurred while contacting the AI service.');
         }
+    }
+
+    protected function getImageFromPixabay($query)
+    {
+        $response = Http::get('https://pixabay.com/api/', [
+            'key'        => config('services.pixabay.key'),
+            'q'          => $query,
+            'image_type' => 'photo',
+            'category'   => 'food',
+            'safesearch' => true,
+            'per_page'   => 3,
+        ]);
+
+        if ($response->successful() && isset($response['hits'][0]['webformatURL'])) {
+            return $response['hits'][0]['webformatURL'];
+        }
+
+        return 'https://via.placeholder.com/300x200'; // fallback image
     }
 }
