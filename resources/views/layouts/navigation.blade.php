@@ -4,9 +4,10 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                <div class="shrink-0 flex items-center space-x-2">
+                    <a href="{{ route('dashboard') }}" class="flex items-center">
                         <img src="{{ asset('images/logo.png') }}" alt="CookEase Logo" class="h-12 w-auto">
+                        <span class="ml-2 text-xl font-semibold text-gray-800 dark:text-dark">CookEase</span>
                     </a>
                 </div>
 
