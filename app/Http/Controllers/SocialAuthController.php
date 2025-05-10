@@ -14,8 +14,8 @@ class SocialAuthController extends Controller
     }
 
     public function handleGoogleCallback() {
-        $user = Socialite::driver('google')->user();
-        $this->loginOrRegisterUser($user);
+        $socialUser = Socialite::driver('google')->user();
+        $user = $this->loginOrRegisterUser($socialUser);
         
         return $user->bmi ? redirect()->route('dashboard') : redirect()->route('bmi.form');
     }
@@ -25,8 +25,8 @@ class SocialAuthController extends Controller
     }
 
     public function handleFacebookCallback() {
-        $user = Socialite::driver('facebook')->user();
-        $this->loginOrRegisterUser($user);
+        $socialUser = Socialite::driver('facebook')->user();
+        $user = $this->loginOrRegisterUser($socialUser);
         
 
        return $user->bmi ? redirect()->route('dashboard') : redirect()->route('bmi.form');
