@@ -26,6 +26,9 @@
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
             </p>
+            <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                {{ __('For third-party login, skip enter password and click delete button.') }}
+            </p>
 
             <div class="mt-6">
                 <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
