@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             IngredientSeeder::class,
+            BmiSeeder::class,
+            RecipeSeeder::class,
+            MealPlanSeeder::class,
+            FavouriteSeeder::class,
         ]);
 
         if (!User::where('email', 'test@example.com')->exists()) {
@@ -23,10 +27,6 @@ class DatabaseSeeder extends Seeder
                 'email' => 'test@example.com',
             ]);
         }
-
-        $this->call([
-            BmiSeeder::class,
-        ]);
     }
 
 }
