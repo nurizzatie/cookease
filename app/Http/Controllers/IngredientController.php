@@ -42,19 +42,32 @@ class IngredientController extends Controller
         Log::info('Cleaned ingredients array:', ['array' => $ingredientsInput]);
 
         // ✅ Load allowed ingredient names from database (lowercased)
-        $allowedIngredients = DB::table('ingredients')->pluck('name')
-            ->map(fn($n) => strtolower($n))
-            ->toArray();
+      $allowedIngredients = DB::table('ingredients')->pluck('name')
+        ->map(fn($n) => strtolower($n))
+        ->toArray();
 
-        // ✅ Validate each input ingredient
-        $cleanedIngredients = [];
-        foreach ($ingredientsInput as $ingredient) {
-            $ingredient = trim(strtolower($ingredient));
-            if (!in_array($ingredient, $allowedIngredients)) {
-                return back()->with('message', 'Sorry, the ingredient "' . $ingredient . '" is not recognized.');
-            }
-            $cleanedIngredients[] = $ingredient;
-        }
+    $cleanedIngredients = [];
+
+    foreach ($ingredientsInput as $ingredient) {
+        $ingredient = trim(strtolower($ingredient));
+
+    if (!in_array($ingredient, $allowedIngredients)) {
+        // Insert new ingredient into DB
+        DB::table('ingredients')->insert([
+            'name'       => $ingredient,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Log::info("✅ New ingredient added to DB: $ingredient");
+
+        // Add to allowed list so no duplicate rejection
+        $allowedIngredients[] = $ingredient;
+    }
+
+    $cleanedIngredients[] = $ingredient;
+}
+
 
         // ✅ Prepare data for API call
         $ingredients = implode(', ', $cleanedIngredients);
