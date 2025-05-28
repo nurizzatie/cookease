@@ -19,6 +19,10 @@
                     <x-nav-link :href="route('generate')" :active="request()->routeIs('generate')">
                         {{ __('Generate Recipe') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('meal-plan.index')" :active="request()->routeIs('meal-plan.index')">
+                        {{ __('Meal Plans') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 
