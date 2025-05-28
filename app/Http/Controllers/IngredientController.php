@@ -298,7 +298,7 @@ PROMPT;
         $healthGoal = $user->healthGoal->goal ?? null;
 
         if ($filterText)  $extraInfo .= " Take into account these preferences: $filterText.";
-        if ($healthGoal)  $extraInfo .= " Here are the recommended recipes based on your $healthGoal.";
+        if ($healthGoal)  $extraInfo .= " The user's health goal is $healthGoal, so recommend recipes that support a healthy diet for this.";
         if ($validated['cooking_time']) $extraInfo .= " Try to keep the cooking time around {$validated['cooking_time']}.";
         if ($validated['budget']) $extraInfo .= " Ensure the recipes fit a {$validated['budget']} budget.";
 
