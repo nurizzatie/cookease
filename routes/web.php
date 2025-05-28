@@ -18,7 +18,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/bmi/update', [BmiController::class, 'update'])->name('bmi.update');
     Route::get('/health-goals', [HealthGoalController::class, 'create'])->name('health_goals.create');
     Route::post('/health-goals', [HealthGoalController::class, 'store'])->name('health_goals.store');
-    Route::post('/bmi/update', [BMIController::class, 'update'])->name('bmi.update');
+    Route::get('/profile/health-goal', [HealthGoalController::class, 'show'])->name('health_goals.show');
+
 
     // 👤 Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
