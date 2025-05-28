@@ -21,47 +21,86 @@ class IngredientController extends Controller
     {
         // ✅ Validate incoming request
         $validated = $request->validate([
-            'ingredients'   => 'required|string',
-            'filters'       => 'array',
-            'cooking_time'  => 'nullable|string',
-            'budget'        => 'nullable|string',
+            'ingredients' => 'required|string',
+            'filters' => 'array',
+            'cooking_time' => 'nullable|string',
+            'budget' => 'nullable|string',
         ]);
 
-        // ✅ Log raw input from Tagify for debugging
         Log::info('Incoming ingredients raw:', ['raw' => $validated['ingredients']]);
 
-        // ✅ Decode JSON input and remove emojis (if any)
+        // ✅ Clean input
         $ingredientsInput = collect(json_decode($validated['ingredients'], true))
             ->pluck('value')
             ->map(function ($item) {
-                // Remove leading emojis + space (if present)
                 return preg_replace('/^[^\w\s]+ /u', '', $item);
             })
             ->toArray();
 
         Log::info('Cleaned ingredients array:', ['array' => $ingredientsInput]);
 
-        // ✅ Load allowed ingredient names from database (lowercased)
+        // ✅ Load existing ingredients
         $allowedIngredients = DB::table('ingredients')->pluck('name')
             ->map(fn($n) => strtolower($n))
             ->toArray();
 
-        // ✅ Validate each input ingredient
         $cleanedIngredients = [];
+
         foreach ($ingredientsInput as $ingredient) {
             $ingredient = trim(strtolower($ingredient));
+
+            // Auto-save if new
             if (!in_array($ingredient, $allowedIngredients)) {
-                return back()->with('message', 'Sorry, the ingredient "' . $ingredient . '" is not recognized.');
+                DB::table('ingredients')->insert([
+                    'name' => $ingredient,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                Log::info("✅ New ingredient added to DB: $ingredient");
+
+                $allowedIngredients[] = $ingredient;
             }
+
             $cleanedIngredients[] = $ingredient;
+
+            // Track usage
+            $user = Auth::user();
+            $ingredientId = DB::table('ingredients')->where('name', $ingredient)->value('id');
+
+            DB::table('ingredient_usage')->insert([
+                'user_id' => $user->id,
+                'ingredient_id' => $ingredientId,
+                'used_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
-        // ✅ Prepare data for API call
-        $ingredients = implode(', ', $cleanedIngredients);
-        $filters     = $validated['filters'] ?? [];
-        $cookingTime = $validated['cooking_time'] ?? '';
-        $budget      = $validated['budget'] ?? '';
+        // ✅ Recently Used
+        $recentIngredients = DB::table('ingredient_usage')
+            ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
+            ->where('ingredient_usage.user_id', Auth::id())
+            ->orderBy('ingredient_usage.used_at', 'desc')
+            ->limit(5)
+            ->pluck('ingredients.name');
 
+        // ✅ Frequently Used
+        $frequentIngredients = DB::table('ingredient_usage')
+            ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
+            ->where('ingredient_usage.user_id', Auth::id())
+            ->select('ingredients.name', DB::raw('count(*) as total'))
+            ->groupBy('ingredients.name')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+
+        // ✅ Prepare for AI
+        $ingredients = implode(', ', $cleanedIngredients);
+        $filters = $validated['filters'] ?? [];
+        $cookingTime = $validated['cooking_time'] ?? '';
+        $budget = $validated['budget'] ?? '';
         $apiKey = config('services.groq.key');
 
         if (!$apiKey) {
@@ -69,26 +108,31 @@ class IngredientController extends Controller
             return back()->with('message', 'AI service is currently unavailable. Please contact the admin.');
         }
 
-        // ✅ Build AI prompt
-        $user = auth()->user();
-        $bmiRecord = $user->bmi; // assuming one-to-one
+        $user = Auth::user();
+        $bmiRecord = $user->bmi;
         $bmiValue = $bmiRecord ? $bmiRecord->getBmiAttribute() : null;
-
         $bmiCategory = 'normal';
 
         if ($bmiValue) {
-            if ($bmiValue < 18.5) $bmiCategory = 'underweight';
-            elseif ($bmiValue >= 25) $bmiCategory = 'overweight';
-            elseif ($bmiValue >= 30) $bmiCategory = 'obese';
+            if ($bmiValue < 18.5)
+                $bmiCategory = 'underweight';
+            elseif ($bmiValue >= 25)
+                $bmiCategory = 'overweight';
+            elseif ($bmiValue >= 30)
+                $bmiCategory = 'obese';
         }
 
         $filterText = implode(', ', $filters);
 
         $extraInfo = '';
-        if ($filterText)   $extraInfo .= " Take into account these preferences: $filterText.";
-        if ($cookingTime)  $extraInfo .= " Try to keep the cooking time around $cookingTime.";
-        if ($budget)       $extraInfo .= " Ensure the recipes fit a $budget budget.";
-        if ($bmiValue)     $extraInfo .= " The user has a BMI of $bmiValue ($bmiCategory), so recommend recipes that support a healthy diet for this condition.";
+        if ($filterText)
+            $extraInfo .= " Take into account these preferences: $filterText.";
+        if ($cookingTime)
+            $extraInfo .= " Try to keep the cooking time around $cookingTime.";
+        if ($budget)
+            $extraInfo .= " Ensure the recipes fit a $budget budget.";
+        if ($bmiValue)
+            $extraInfo .= " The user has a BMI of $bmiValue ($bmiCategory), so recommend recipes that support a healthy diet for this condition.";
 
         $prompt = <<<PROMPT
 Generate 12 Malaysian recipes using the following ingredients: $ingredients.$extraInfo
@@ -108,18 +152,16 @@ Each recipe must be in **JSON format** and include:
 Return **only a JSON array** of recipe objects. Do not include any explanation or introduction text.
 PROMPT;
 
-
         try {
-            // ✅ Make API call to Groq
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type'  => 'application/json',
+                'Content-Type' => 'application/json',
             ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model'    => 'meta-llama/llama-4-scout-17b-16e-instruct',
-                'messages' => [
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-            ]);
+                        'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
+                        'messages' => [
+                            ['role' => 'user', 'content' => $prompt],
+                        ],
+                    ]);
 
             $json = $response->json();
 
@@ -128,21 +170,17 @@ PROMPT;
                 return back()->with('message', 'Failed to generate recipe: ' . $json['error']['message']);
             }
 
-            // ✅ Process AI response
             $aiContent = $json['choices'][0]['message']['content'] ?? null;
-
             Log::info('Groq AI Response:', ['content' => $aiContent]);
 
             try {
-                // Strip Markdown-style ```json block if present
                 $aiContent = trim($aiContent);
                 if (str_starts_with($aiContent, '```json')) {
-                    $aiContent = preg_replace('/^```json\s*/', '', $aiContent); // remove starting ```json
-                    $aiContent = preg_replace('/```$/', '', $aiContent);        // remove ending ```
+                    $aiContent = preg_replace('/^```json\s*/', '', $aiContent);
+                    $aiContent = preg_replace('/```$/', '', $aiContent);
                     $aiContent = trim($aiContent);
                 }
 
-                // Try decoding cleaned JSON
                 $recipes = json_decode($aiContent, true);
                 if (!is_array($recipes)) {
                     throw new \Exception('Decoded result is not an array.');
@@ -152,13 +190,24 @@ PROMPT;
                 return back()->with('message', 'AI did not return usable recipe data.');
             }
 
-            // ✅ Add real image to each recipe from Pixabay
             foreach ($recipes as &$recipe) {
                 $recipe['image'] = $this->getImageFromPixabay($recipe['name']);
             }
 
-            session(['generated_recipes' => $recipes]);
-            return view('generate-results', compact('ingredients', 'recipes'));
+            session([
+                'generated_recipes' => $recipes,
+                'ingredients_used' => $ingredients,
+            ]);
+
+            return redirect()->route('generate.result');
+
+
+            // return view('generate-results', [
+            //     'ingredients' => $ingredients,
+            //     'recipes' => $recipes,
+            //     'recentIngredients' => $recentIngredients,
+            //     'frequentIngredients' => $frequentIngredients
+            // ]);
 
         } catch (\Exception $e) {
             Log::error('Groq API exception: ' . $e->getMessage());
@@ -166,15 +215,35 @@ PROMPT;
         }
     }
 
+     public function showResult()
+    {
+        $recipes = session('generated_recipes');
+        $ingredients = session('ingredients_used');
+        $recentIngredients = $this->getGroupedIngredientData(Auth::id())['recent'] ?? [];
+        $frequentIngredients = $this->getGroupedIngredientData(Auth::id())['frequent'] ?? [];
+
+        if (!$recipes) {
+            return redirect()->route('generate')->with('message', 'No recipe found. Please try again.');
+        }
+
+        return view('generate-results', [
+            'recipes' => $recipes,
+            'ingredients' => $ingredients,
+            'recentIngredients' => $recentIngredients,
+            'frequentIngredients' => $frequentIngredients,
+        ]);
+    }
+
+
     protected function getImageFromPixabay($query)
     {
         $response = Http::get('https://pixabay.com/api/', [
-            'key'        => config('services.pixabay.key'),
-            'q'          => $query,
+            'key' => config('services.pixabay.key'),
+            'q' => $query,
             'image_type' => 'photo',
-            'category'   => 'food',
+            'category' => 'food',
             'safesearch' => true,
-            'per_page'   => 3,
+            'per_page' => 3,
         ]);
 
         if ($response->successful() && isset($response['hits'][0]['webformatURL'])) {
@@ -183,4 +252,69 @@ PROMPT;
 
         return 'https://via.placeholder.com/300x200'; // fallback image
     }
+
+ public function getGroupedIngredients()
+    {
+        return response()->json([
+            [
+                'name'  => '🕑 Recently Used',
+                'items' => array_map(fn($i) => ['value' => $i], $this->getGroupedIngredientData(Auth::id())['recent'])
+            ],
+            [
+                'name'  => '🔥 Frequently Used',
+                'items' => array_map(fn($i) => ['value' => $i], $this->getGroupedIngredientData(Auth::id())['frequent'])
+            ]
+        ]);
+    }
+
+    protected function getGroupedIngredientData($userId)
+    {
+        $recent = DB::table('ingredient_usage')
+            ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
+            ->where('ingredient_usage.user_id', $userId)
+            ->orderBy('ingredient_usage.used_at', 'desc')
+            ->limit(5)
+            ->pluck('ingredients.name')
+            ->toArray();
+
+        $frequent = DB::table('ingredient_usage')
+            ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
+            ->where('ingredient_usage.user_id', $userId)
+            ->select('ingredients.name', DB::raw('count(*) as total'))
+            ->groupBy('ingredients.name')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->pluck('ingredients.name')
+            ->toArray();
+
+        return compact('recent', 'frequent');
+    }
+
+    private function buildExtraInfo($validated, $user)
+    {
+        $extraInfo = '';
+        $filters = $validated['filters'] ?? [];
+        $filterText = implode(', ', $filters);
+        $healthGoal = $user->healthGoal->goal ?? null;
+
+        if ($filterText)  $extraInfo .= " Take into account these preferences: $filterText.";
+        if ($healthGoal)  $extraInfo .= " Here are the recommended recipes based on your $healthGoal.";
+        if ($validated['cooking_time']) $extraInfo .= " Try to keep the cooking time around {$validated['cooking_time']}.";
+        if ($validated['budget']) $extraInfo .= " Ensure the recipes fit a {$validated['budget']} budget.";
+
+        $bmi = $user->bmi;
+        if ($bmi) {
+            $bmiValue = $bmi->getBmiAttribute();
+            $category = 'normal';
+            if ($bmiValue < 18.5) $category = 'underweight';
+            elseif ($bmiValue >= 25) $category = 'overweight';
+            elseif ($bmiValue >= 30) $category = 'obese';
+            $extraInfo .= " The user has a BMI of $bmiValue ($category), so recommend recipes that support a healthy diet for this condition.";
+        }
+
+        return $extraInfo;
+    }
+
+
+
 }

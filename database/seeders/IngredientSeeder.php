@@ -13,8 +13,7 @@ class IngredientSeeder extends Seeder
     public function run(): void
     {
 
-        // Clear the table first
-        \DB::table('ingredients')->truncate();
+        
 
         $ingredients = [
             // Proteins
@@ -35,11 +34,10 @@ class IngredientSeeder extends Seeder
 
 
         foreach ($ingredients as $ingredient) {
-            DB::table('ingredients')->insert([
-                'name' => $ingredient,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        DB::table('ingredients')->updateOrInsert(
+            ['name' => $ingredient], // condition
+            ['created_at' => now(), 'updated_at' => now()] // update/insert
+        );
         }
 
 
