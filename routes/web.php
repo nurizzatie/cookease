@@ -6,6 +6,8 @@ use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\BMIController;
 use App\Http\Controllers\GenerateController;
+use App\Http\Controllers\MealPlanController;
+
 
 // 🔐 Authenticated user routes
 Route::middleware(['auth'])->group(function () {
@@ -54,6 +56,14 @@ Route::get('/dashboard', fn () => view('dashboard'))->middleware(['auth', 'verif
 
 // 🔍 Dev-only testing view (optional)
 Route::get('/test-filters', fn () => view('test-filters'));
+
+// My Meals Plan
+Route::middleware(['auth'])->group(function () {
+    Route::get('/meal-plan', [MealPlanController::class, 'index'])->name('meal-plan.index');
+    Route::post('/meal-plan', [MealPlanController::class, 'store'])->name('meal-plan.store');
+    Route::delete('/meal-plan/{mealPlan}', [MealPlanController::class, 'destroy'])->name('meal-plan.destroy');
+});
+
 
 
 
