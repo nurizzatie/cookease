@@ -20,10 +20,14 @@ class ProfileController extends Controller
     {
         $user = $request->user();
     $bmi = $user->bmi; // assumes User model has a `bmi()` relationship
+    $healthGoal = optional($user->healthGoal)->goal;
+    $calorieTarget = $bmi?->calorie_target;
 
     return view('profile.edit', [
         'user' => $user,
         'bmi' => $bmi,
+        'healthGoal' => $healthGoal,
+        'calorieTarget' => $calorieTarget,
     ]);
     }
 

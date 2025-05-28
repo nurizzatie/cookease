@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\IngredientController;
+use App\Http\Controllers\HealthGoalController;
 use App\Http\Controllers\BMIController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Ingredient;
@@ -52,6 +53,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/bmi/form', [BMIController::class, 'showForm'])->name('bmi.form');
     Route::post('/bmi/store', [BMIController::class, 'store'])->name('profile.bmi.update');
     Route::post('/bmi/update', [BmiController::class, 'update'])->name('bmi.update');
+    Route::get('/health-goals', [HealthGoalController::class, 'create'])->name('health_goals.create');
+    Route::post('/health-goals', [HealthGoalController::class, 'store'])->name('health_goals.store');
 });
 
 require __DIR__.'/auth.php';

@@ -51,6 +51,11 @@ class User extends Authenticatable
         return $this->hasOne(Bmi::class);
     }
 
+    public function healthGoal()
+    {
+        return $this->hasOne(HealthGoal::class);
+    }
+
     public function favorites()
     {
         return $this->belongsToMany(Recipe::class, 'favorites');

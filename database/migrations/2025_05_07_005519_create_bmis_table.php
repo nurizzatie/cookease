@@ -20,6 +20,7 @@ return new class extends Migration
             $table->float('weight');
             $table->enum('gender', ['male', 'female']);
             $table->float('bmi_value')->nullable();
+            
         });
     }
 

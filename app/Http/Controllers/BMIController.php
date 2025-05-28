@@ -32,7 +32,7 @@ class BMIController extends Controller
     $bmi->weight = $request->weight;
     $bmi->save();
 
-    return redirect()->route('dashboard');
+    return redirect()->route('health_goals.create');
     }
 
     public function update(Request $request)
