@@ -111,16 +111,16 @@ class IngredientController extends Controller
         $user = Auth::user();
         $bmiRecord = $user->bmi;
         $bmiValue = $bmiRecord ? $bmiRecord->getBmiAttribute() : null;
-        $bmiCategory = 'normal';
+        $bmiCategory = $bmiRecord ? $bmiRecord->getBmiCategory() : null;;
 
-        if ($bmiValue) {
-            if ($bmiValue < 18.5)
-                $bmiCategory = 'underweight';
-            elseif ($bmiValue >= 25)
-                $bmiCategory = 'overweight';
-            elseif ($bmiValue >= 30)
-                $bmiCategory = 'obese';
-        }
+        // if ($bmiValue) {
+        //     if ($bmiValue < 18.5)
+        //         $bmiCategory = 'underweight';
+        //     elseif ($bmiValue >= 25)
+        //         $bmiCategory = 'overweight';
+        //     elseif ($bmiValue >= 30)
+        //         $bmiCategory = 'obese';
+        // }
 
         $filterText = implode(', ', $filters);
 
@@ -253,7 +253,7 @@ PROMPT;
         return 'https://via.placeholder.com/300x200'; // fallback image
     }
 
- public function getGroupedIngredients()
+    public function getGroupedIngredients()
     {
         return response()->json([
             [

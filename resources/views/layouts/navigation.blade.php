@@ -19,6 +19,12 @@
                     <x-nav-link :href="route('generate')" :active="request()->routeIs('generate')">
                         {{ __('Generate Recipe') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('recipes.browse')" :active="request()->routeIs('recipes.browse')">
+                        {{ __('Browse Recipes') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('recipes.saved')" :active="request()->routeIs('recipes.saved')">
+                        {{ __('Favorite Recipes') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('meal-plan.index')" :active="request()->routeIs('meal-plan.index')">
                         {{ __('Meal Plans') }}
                     </x-nav-link>
