@@ -62,7 +62,7 @@
 
                     <!-- @php
                         $ingredients = collect($recipe['groceryLists'] ?? [])->map(fn($item) => "- " . $item)->implode("\n");
-                        $waText = "🛒 CookEase Shopping List:\n" . $ingredients;
+                        $waText = "🛒 CookEase Shopping List:\n" . $ingredients ;
                         $waMessage = rawurlencode($waText);
                     @endphp
 

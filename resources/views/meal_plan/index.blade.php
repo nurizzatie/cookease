@@ -7,20 +7,20 @@
 
     <div class="text-center max-w-4xl mx-auto py-8 px-4">
 
-    <div class="flex justify-start mb-6 border-b pb-4">
-        
-        <form method="GET" action="{{ route('meal-plan.index') }}" class="mb-6">
-            <label for="date" class="text-sm font-medium text-gray-700 mr-2">📅 Date:</label>
-            <select name="date" id="date" onchange="this.form.submit()"
-                class="border-gray-300  px-3 py-1 text-sm shadow-sm">
-                @foreach ($availableDates as $availableDate)
-                    <option value="{{ $availableDate }}" {{ $date == $availableDate ? 'selected' : '' }}>
-                        {{ \Carbon\Carbon::parse($availableDate)->format('l, d M Y') }}
-                    </option>
-                @endforeach
-            </select>
-        </form>
-    </div>
+        <div class="flex justify-start mb-6 border-b pb-4">
+            <form method="GET" action="{{ route('meal-plan.index') }}" class="mb-6">
+               <label for="date" class="block text-sm font-medium text-gray-700 mr-2 text-left">📅 Date:</label>
+
+                <select name="date" id="date" onchange="this.form.submit()"
+                    class="border-gray-300 px-3 py-1 text-sm shadow-sm w-full">
+                    @foreach ($availableDates as $availableDate)
+                        <option value="{{ $availableDate }}" {{ $date == $availableDate ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::parse($availableDate)->format('l, d M Y') }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
 
         @if ($plans->isNotEmpty())
 
@@ -33,8 +33,7 @@
             @endphp
 
             @foreach ($categories as $key => $label)
-               @php $mealsByType = $plans[$key] ?? collect(); @endphp
-
+                @php $mealsByType = $plans[$key] ?? collect(); @endphp
 
                 @if ($mealsByType->isNotEmpty())
                     <div class="text-left mb-4 mt-10">
@@ -45,7 +44,39 @@
                         @foreach ($mealsByType as $meal)
                             @php $recipe = $meal->recipe; @endphp
 
-                            <div class="rounded overflow-hidden shadow-lg flex flex-col bg-white">
+                            <div class="relative rounded overflow-hidden shadow-lg flex flex-col bg-white">
+                                <!-- 3 Dots Menu -->
+                                <div class="absolute top-2 right-2 z-10">
+<button type="button"
+    onclick="toggleMenu('menu-{{ $meal->id }}')"
+    class="bg-white text-gray-700 rounded-full w-8 h-8 flex items-center justify-center shadow hover:bg-gray-100 focus:outline-none">
+    &#8942;
+</button>
+
+
+                                    <div id="menu-{{ $meal->id }}" class="hidden absolute right-0 mt-2 w-40 bg-white border rounded shadow-md text-sm">
+            <!--  EDIT opens modal -->
+            <button onclick="openModal({{ $meal->id }})"
+                class="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                Edit
+            </button>
+                                        <button type="button"
+                                            onclick="confirmDelete({{ $meal->id }})"
+                                            class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100">
+                                            Delete
+                                        </button>
+
+                                        <form id="delete-form-{{ $meal->id }}"
+                                              action="{{ route('meal-plan.destroy', $meal->id) }}"
+                                              method="POST"
+                                              class="hidden">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Card Content -->
                                 <a href="{{ route('recipe.saved.detail', ['id' => $recipe->id]) }}">
                                     <div class="relative h-48 w-full overflow-hidden">
                                         <img src="{{ $recipe->image }}" alt="recipe image" class="w-full h-full object-cover">
@@ -65,6 +96,42 @@
                                     <span>🔥 {{ $recipe->calories ?? 'N/A' }} kcal</span>
                                 </div>
                             </div>
+                            <!-- Edit Modal -->
+<div id="edit-modal-{{ $meal->id }}" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+     onclick="closeModalOnOutside(event, {{ $meal->id }})">
+
+    <div class="bg-white w-full max-w-md mx-auto p-6 rounded shadow-lg">
+        <h2 class="text-lg font-semibold mb-4">✏️ Edit Meal</h2>
+        <form method="POST" action="{{ route('meal-plan.update', $meal->id) }}">
+            @csrf
+            @method('PUT')
+
+            <div class="mb-4 text-left">
+                <label for="date-{{ $meal->id }}" class="block text-sm font-medium text-gray-700">📅 Date</label>
+                <input type="date" name="date" id="date-{{ $meal->id }}" value="{{ $meal->date }}"
+                       class="mt-1 block w-full rounded border-gray-300 shadow-sm" required>
+            </div>
+
+            <div class="mb-4 text-left">
+                <label for="meal_type-{{ $meal->id }}" class="block text-sm font-medium text-gray-700">🍽 Meal Type</label>
+                <select name="meal_type" id="meal_type-{{ $meal->id }}"
+                        class="mt-1 block w-full rounded border-gray-300 shadow-sm" required>
+                    <option value="breakfast" {{ $meal->meal_type === 'breakfast' ? 'selected' : '' }}>Breakfast</option>
+                    <option value="lunch" {{ $meal->meal_type === 'lunch' ? 'selected' : '' }}>Lunch</option>
+                    <option value="dinner" {{ $meal->meal_type === 'dinner' ? 'selected' : '' }}>Dinner</option>
+                    <option value="snack" {{ $meal->meal_type === 'snack' ? 'selected' : '' }}>Snack</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeModal({{ $meal->id }})"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
                         @endforeach
                     </div>
                 @endif
@@ -83,4 +150,46 @@
             </div>
         @endif
     </div>
+
+    <!-- ✅ JavaScript -->
+   <script>
+    function toggleMenu(id) {
+        document.querySelectorAll('[id^="menu-"]').forEach(menu => {
+            if (menu.id !== id) menu.classList.add('hidden');
+        });
+        document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function confirmDelete(mealId) {
+        if (confirm("Are you sure you want to delete this meal?")) {
+            document.getElementById('delete-form-' + mealId).submit();
+        }
+    }
+
+    function openModal(id) {
+        document.getElementById('edit-modal-' + id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+        document.getElementById('edit-modal-' + id).classList.add('hidden');
+    }
+
+    window.addEventListener('click', function(e) {
+        const target = e.target;
+        document.querySelectorAll('[id^="menu-"]').forEach(menu => {
+            if (!menu.contains(target) && !menu.previousElementSibling.contains(target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    });
+
+    function closeModalOnOutside(e, id) {
+    const modalBox = document.querySelector('#edit-modal-' + id + ' > div');
+    if (!modalBox.contains(e.target)) {
+        closeModal(id);
+    }
+}
+
+</script>
+
 </x-app-layout>

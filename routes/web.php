@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\MealPlanController;
 
 
+
+
 // 🔐 Authenticated user routes
 Route::middleware(['auth'])->group(function () {
 
@@ -137,7 +139,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/meal-plan/store-generated', [MealPlanController::class, 'storeFromGenerated'])->name('meal-plan.storeGenerated');
     Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.showSaved');
     Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.saved.detail');
-    
+    Route::get('/meal-plan/{id}/edit', [MealPlanController::class, 'edit'])->name('meal-plan.edit');
+Route::put('/meal-plan/{id}', [MealPlanController::class, 'update'])->name('meal-plan.update');
+
+
 });
 
 // Route::get('/recipe-saved-/{id}', function ($id) {
@@ -145,7 +150,6 @@ Route::middleware(['auth'])->group(function () {
 
 //     return view('recipe-saved', ['recipe' => $recipe]);
 // })->name('recipe.saved.detail');
-
 
 
 
