@@ -33,8 +33,9 @@
     </div>
 
     <!-- Edit Mode -->
-    <form x-show="editingGoal" x-cloak method="POST" action="{{ route('health_goals.store') }}" class="mt-6 space-y-6">
+    <form x-show="editingGoal" x-cloak method="POST" action="{{ route('health_goals.update') }}" class="mt-6 space-y-6">
         @csrf
+        @method('PUT')
         
 
         <div>

@@ -21,6 +21,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/health-goals', [HealthGoalController::class, 'create'])->name('health_goals.create');
     Route::post('/health-goals', [HealthGoalController::class, 'store'])->name('health_goals.store');
     Route::get('/profile/health-goal', [HealthGoalController::class, 'show'])->name('health_goals.show');
+    Route::put('/profile/health-goal', [HealthGoalController::class, 'update'])->name('health_goals.update');
+
 
 
     // 👤 Profile

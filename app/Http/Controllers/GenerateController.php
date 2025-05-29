@@ -10,7 +10,7 @@ class GenerateController extends Controller
 {
     public function process(Request $request)
 {
-    $userId = auth()->id();
+    $userId = Auth::id();
     $rawIngredients = $request->input('ingredients');
 
     // Decode Tagify input if it's in JSON format (e.g. [{"value":"chicken"}, {"value":"tofu"}])
@@ -50,7 +50,7 @@ class GenerateController extends Controller
 
     public function showForm()
     {
-        $userId = auth()->id(); // safer kalau Auth::user() not logged in
+        $userId = Auth::id(); // safer kalau Auth::user() not logged in
 
         // Get recent ingredients used by the user (last 5)
       $recentIngredients = DB::table('ingredient_usage')
@@ -65,7 +65,7 @@ class GenerateController extends Controller
         // Get most frequent ingredients used by the user
         $frequentIngredients = DB::table('ingredient_usage')
             ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
-            ->where('ingredient_usage.user_id', auth()->id())
+            ->where('ingredient_usage.user_id', Auth::id())
             ->select('ingredients.name', DB::raw('count(*) as total'))
             ->groupBy('ingredients.name')
             ->orderByDesc('total')
