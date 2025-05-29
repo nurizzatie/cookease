@@ -2,7 +2,6 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-black leading-tight">
             {{ __('Dashboard') }}
-            
         </h2>
     </x-slot>
 
@@ -16,362 +15,122 @@
             </div>
         </div>
 
-        <div class="max-w-screen-xl mx-auto p-5 sm:p-10 md:p-10">   
-            <div class="border-b mb-5 flex justify-between text-sm">
-                <div class="text-yellow-600 flex items-center pb-2 pr-2 border-b-2 border-yellow-600 uppercase">
-                    <i class="fa-solid fa-bowl-food mr-1"></i>
-                    <a href="#" class="font-semibold inline-block">Today's Menu Recommendation</a>
+        <div class="max-w-screen-xl mx-auto p-5 sm:p-10 md:p-10">
+            <div class="grid grid-cols-1 gap-4 px-4 mb-10 sm:grid-cols-4 sm:px-8">
+                <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
+                    <div class="p-4 text-white" style="background-color: #FAD59A"><i class="fa-solid fa-weight-scale fa-3x"></i></div>
+                    <div class="px-4 text-gray-700">
+                        <h3 class="text-sm tracking-wider">Your BMI</h3>
+                        <p class="text-3xl">{{ $bmiCategory }}</p>
+                    </div>
                 </div>
-                <a href="#">See All</a>
+                <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
+                    <div class="p-4 text-white" style="background-color: #FADA7A"><i class="fa-solid fa-fire fa-3x"></i></div>
+                    <div class="px-4 text-gray-700">
+                        <h3 class="text-sm tracking-wider">Calories Intake Today</h3>
+                        <p class="text-3xl">{{ $todayCalories }} kcal</p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
+                    <div class="p-4 text-white" style="background-color: #B1C29E"><i class="fa-solid fa-bowl-rice fa-3x"></i></div>
+                    <div class="px-4 text-gray-700">
+                        <h3 class="text-sm tracking-wider">Saved Recipes</h3>
+                        <p class="text-3xl">{{ $savedCount }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
+                    <div class="p-4 text-white" style="background-color: #F0A04B"><i class="fa-solid fa-file-arrow-down fa-3x"></i></div>
+                    <div class="px-4 text-gray-700">
+                        <h3 class="text-sm tracking-wider">Recipes Generated</h3>
+                        <p class="text-3xl">{{ $generatedCount }}</p>
+                    </div>
+                </div>
             </div>
 
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                <!-- Left Column -->
+                <div class="flex flex-col space-y-6">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-
-                <!-- CARD 1 -->
-                <div class="rounded overflow-hidden shadow-lg flex flex-col">
-                    <a href="#"></a>
-                    <div class="relative"><a href="#">
-                            <img class="w-full"
-                                src="https://images.pexels.com/photos/61180/pexels-photo-61180.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500"
-                                alt="Sunset in the mountains">
-                            <div
-                                class="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25">
-                            </div>
-                        </a>
-                        <a href="#!">
-                            <div
-                                class="text-xs absolute top-0 right-0 bg-yellow-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-yellow-600 transition duration-500 ease-in-out">
-                                Cooking
-                            </div>
-                        </a>
+                    <!-- Daily Cooking Tips -->
+                    <div class="bg-lime-100 shadow rounded-2xl p-4 flex flex-col h-full">
+                        <h2 class="text-lg sm:text-xl md:text-xl font-semibold mb-4">💡Daily Cooking Tips</h2>
+                        <ul class="space-y-2 list-disc list-inside text-sm text-gray-700 flex-1">
+                            @foreach ($tips as $tip)
+                                <li>{{ $tip }}</li>
+                            @endforeach
+                        </ul>
                     </div>
-                    <div class="px-6 py-4 mb-auto">
-                        <a href="#"
-                            class="font-medium text-lg inline-block hover:text-yellow-600 transition duration-500 ease-in-out inline-block mb-2">Simplest
-                            Salad Recipe ever</a>
-                        <p class="text-gray-500 text-sm">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                        </p>
-                    </div>
-                    <div class="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg height="13px" width="13px" version="1.1" id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                                y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;"
-                                xml:space="preserve">
-                                <g>
-                                    <g>
-                                        <path
-                                            d="M256,0C114.837,0,0,114.837,0,256s114.837,256,256,256s256-114.837,256-256S397.163,0,256,0z M277.333,256 c0,11.797-9.536,21.333-21.333,21.333h-85.333c-11.797,0-21.333-9.536-21.333-21.333s9.536-21.333,21.333-21.333h64v-128 c0-11.797,9.536-21.333,21.333-21.333s21.333,9.536,21.333,21.333V256z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <span class="ml-1">6 mins ago</span>
-                        </span>
 
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg class="h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
-                                </path>
-                            </svg>
-                            <span class="ml-1">39 Comments</span>
-                        </span>
+                    <!-- Today's Meal Plan -->
+                    <div class="bg-yellow-100 shadow rounded-2xl p-4 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg sm:text-xl md:text-xl font-semibold">📆 Today's Meal Plan</h2>
+                            <a href="#" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
+                        </div>
+                        <ul class="space-y-2 flex-1">
+                        @forelse ($todaysPlans as $plan)
+                            <li class="border p-3 rounded-lg">
+                                🍽 {{ ucfirst($plan->meal_type) }}: {{ $plan->recipe->name ?? 'N/A' }}
+                            </li>
+                        @empty
+                            <li class="text-gray-500">No meals planned for today.</li>
+                        @endforelse
+                        </ul>
+                    </div>
+
+                    <!-- Recently Saved Recipes -->
+                    <div class="bg-orange-100 shadow rounded-2xl p-4 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg sm:text-xl md:text-xl font-semibold">❤️ Recently Saved Recipes</h2>
+                            <a href="{{ route('recipes.saved') }}" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
+                        </div>
+                        <div class="space-y-3 flex-1">
+                        @foreach ($recentFavorites as $recipe)
+                            <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300">
+                                <a href="{{ route('recipe.detail', $recipe->id) }}">
+                                    <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-full h-48 object-cover">
+                                    <div class="p-4">
+                                        <h3 class="font-semibold text-lg text-gray-800">{{ $recipe->name }}</h3>
+                                        <p class="text-gray-500 text-sm mt-1">{{ Str::limit($recipe->description, 100) }}</p>
+                                        <div class="mt-2 text-xs text-gray-600 flex justify-between">
+                                            <span>⏱ {{ $recipe->duration }}</span>
+                                            <span>🔥 {{ $recipe->calories }} kcal</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        @endforeach
+                        </div>
                     </div>
                 </div>
 
-
-
-                <!-- CARD 2 -->
-                <div class="rounded overflow-hidden shadow-lg flex flex-col">
-                    <a href="#"></a>
-                    <div class="relative"><a href="#">
-                            <img class="w-full"
-                                src="https://images.pexels.com/photos/1600727/pexels-photo-1600727.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500"
-                                alt="Sunset in the mountains">
-                            <div
-                                class="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25">
-                            </div>
-                        </a><a href="#!">
-                            <div
-                                class="text-xs absolute top-0 right-0 bg-yellow-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-yellow-600 transition duration-500 ease-in-out">
-                                Cooking
+                <!-- Right Column -->
+                <div class="bg-amber-50 shadow rounded-2xl p-4 flex flex-col h-full">
+                <div class="flex items-center justify-between mb-5">
+                    <h2 class="text-lg sm:text-xl md:text-xl font-semibold">🥗 Recipe Recommendations</h2>
+                    <a href="{{ route('recipes.browse') }}" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
+                </div>
+                <div class="space-y-3 flex-1">
+                @foreach ($recommendedRecipes as $recipe)
+                    <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300">
+                        <a href="{{ route('recipe.detail', $recipe->id) }}">
+                            <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <h3 class="font-semibold text-lg text-gray-800">{{ $recipe->name }}</h3>
+                                <p class="text-gray-500 text-sm mt-1">{{ Str::limit($recipe->description, 100) }}</p>
+                                <div class="mt-2 text-xs text-gray-600 flex justify-between">
+                                    <span>⏱ {{ $recipe->duration }}</span>
+                                    <span>🔥 {{ $recipe->calories }} kcal</span>
+                                </div>
                             </div>
                         </a>
                     </div>
-                    <div class="px-6 py-4 mb-auto">
-                        <a href="#"
-                            class="font-medium text-lg inline-block hover:text-yellow-600 transition duration-500 ease-in-out inline-block mb-2">Best
-                            FastFood Ideas (Yummy)</a>
-                        <p class="text-gray-500 text-sm">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                        </p>
-                    </div>
-                    <div class="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg height="13px" width="13px" version="1.1" id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                                y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;"
-                                xml:space="preserve">
-                                <g>
-                                    <g>
-                                        <path
-                                            d="M256,0C114.837,0,0,114.837,0,256s114.837,256,256,256s256-114.837,256-256S397.163,0,256,0z M277.333,256 c0,11.797-9.536,21.333-21.333,21.333h-85.333c-11.797,0-21.333-9.536-21.333-21.333s9.536-21.333,21.333-21.333h64v-128 c0-11.797,9.536-21.333,21.333-21.333s21.333,9.536,21.333,21.333V256z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <span class="ml-1"> 10 days ago</span>
-                        </span>
-
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg class="h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
-                                </path>
-                            </svg>
-                            <span class="ml-1">0 Comments</span>
-                        </span>
-                    </div>
+                @endforeach
                 </div>
-
-
+                </div>
                 
-                <!-- CARD 3 -->
-                <div class="rounded overflow-hidden shadow-lg flex flex-col">
-                    <a href="#"></a>
-                    <div class="relative"><a href="#">
-                            <img class="w-full"
-                                src="https://images.pexels.com/photos/6086/food-salad-healthy-vegetables.jpg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500"
-                                alt="Sunset in the mountains">
-                            <div
-                                class="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25">
-                            </div>
-                        </a><a href="#!">
-                            <div
-                                class="text-xs absolute top-0 right-0 bg-yellow-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-yellow-600 transition duration-500 ease-in-out">
-                                Cooking
-                            </div>
-                        </a>
-                    </div>
-                    <div class="px-6 py-4 mb-auto">
-                        <a href="#"
-                            class="font-medium text-lg inline-block hover:text-yellow-600 transition duration-500 ease-in-out inline-block mb-2">Why
-                            to eat salad?</a>
-                        <p class="text-gray-500 text-sm">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                        </p>
-                    </div>
-                    <div class="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg height="13px" width="13px" version="1.1" id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                                y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;"
-                                xml:space="preserve">
-                                <g>
-                                    <g>
-                                        <path
-                                            d="M256,0C114.837,0,0,114.837,0,256s114.837,256,256,256s256-114.837,256-256S397.163,0,256,0z M277.333,256 c0,11.797-9.536,21.333-21.333,21.333h-85.333c-11.797,0-21.333-9.536-21.333-21.333s9.536-21.333,21.333-21.333h64v-128 c0-11.797,9.536-21.333,21.333-21.333s21.333,9.536,21.333,21.333V256z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <span class="ml-1">16 hours ago</span>
-                        </span>
-
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg class="h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
-                                </path>
-                            </svg>
-                            <span class="ml-1">9 Comments</span>
-                        </span>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <div class="max-w-screen-xl mx-auto p-5 sm:p-10 md:p-10">   
-            <div class="border-b mb-5 flex justify-between text-sm">
-                <div class="text-yellow-600 flex items-center pb-2 pr-2 border-b-2 border-yellow-600 uppercase">
-                    <i class="fa-solid fa-newspaper mr-1"></i>
-                    <a href="#" class="font-semibold inline-block">Cooking Tips</a>
-                </div>
-                <a href="#">See All</a>
-            </div>
-
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-
-                <!-- CARD 1 -->
-                <div class="rounded overflow-hidden shadow-lg flex flex-col">
-                    <a href="#"></a>
-                    <div class="relative"><a href="#">
-                            <img class="w-full"
-                                src="https://images.pexels.com/photos/61180/pexels-photo-61180.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500"
-                                alt="Sunset in the mountains">
-                            <div
-                                class="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25">
-                            </div>
-                        </a>
-                        <a href="#!">
-                            <div
-                                class="text-xs absolute top-0 right-0 bg-yellow-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-yellow-600 transition duration-500 ease-in-out">
-                                Cooking
-                            </div>
-                        </a>
-                    </div>
-                    <div class="px-6 py-4 mb-auto">
-                        <a href="#"
-                            class="font-medium text-lg inline-block hover:text-yellow-600 transition duration-500 ease-in-out inline-block mb-2">Simplest
-                            Salad Recipe ever</a>
-                        <p class="text-gray-500 text-sm">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                        </p>
-                    </div>
-                    <div class="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg height="13px" width="13px" version="1.1" id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                                y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;"
-                                xml:space="preserve">
-                                <g>
-                                    <g>
-                                        <path
-                                            d="M256,0C114.837,0,0,114.837,0,256s114.837,256,256,256s256-114.837,256-256S397.163,0,256,0z M277.333,256 c0,11.797-9.536,21.333-21.333,21.333h-85.333c-11.797,0-21.333-9.536-21.333-21.333s9.536-21.333,21.333-21.333h64v-128 c0-11.797,9.536-21.333,21.333-21.333s21.333,9.536,21.333,21.333V256z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <span class="ml-1">6 mins ago</span>
-                        </span>
-
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg class="h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
-                                </path>
-                            </svg>
-                            <span class="ml-1">39 Comments</span>
-                        </span>
-                    </div>
-                </div>
-
-
-
-                <!-- CARD 2 -->
-                <div class="rounded overflow-hidden shadow-lg flex flex-col">
-                    <a href="#"></a>
-                    <div class="relative"><a href="#">
-                            <img class="w-full"
-                                src="https://images.pexels.com/photos/1600727/pexels-photo-1600727.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500"
-                                alt="Sunset in the mountains">
-                            <div
-                                class="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25">
-                            </div>
-                        </a><a href="#!">
-                            <div
-                                class="text-xs absolute top-0 right-0 bg-yellow-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-yellow-600 transition duration-500 ease-in-out">
-                                Cooking
-                            </div>
-                        </a>
-                    </div>
-                    <div class="px-6 py-4 mb-auto">
-                        <a href="#"
-                            class="font-medium text-lg inline-block hover:text-yellow-600 transition duration-500 ease-in-out inline-block mb-2">Best
-                            FastFood Ideas (Yummy)</a>
-                        <p class="text-gray-500 text-sm">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                        </p>
-                    </div>
-                    <div class="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg height="13px" width="13px" version="1.1" id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                                y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;"
-                                xml:space="preserve">
-                                <g>
-                                    <g>
-                                        <path
-                                            d="M256,0C114.837,0,0,114.837,0,256s114.837,256,256,256s256-114.837,256-256S397.163,0,256,0z M277.333,256 c0,11.797-9.536,21.333-21.333,21.333h-85.333c-11.797,0-21.333-9.536-21.333-21.333s9.536-21.333,21.333-21.333h64v-128 c0-11.797,9.536-21.333,21.333-21.333s21.333,9.536,21.333,21.333V256z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <span class="ml-1"> 10 days ago</span>
-                        </span>
-
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg class="h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
-                                </path>
-                            </svg>
-                            <span class="ml-1">0 Comments</span>
-                        </span>
-                    </div>
-                </div>
-
-
-                
-                <!-- CARD 3 -->
-                <div class="rounded overflow-hidden shadow-lg flex flex-col">
-                    <a href="#"></a>
-                    <div class="relative"><a href="#">
-                            <img class="w-full"
-                                src="https://images.pexels.com/photos/6086/food-salad-healthy-vegetables.jpg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500"
-                                alt="Sunset in the mountains">
-                            <div
-                                class="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25">
-                            </div>
-                        </a><a href="#!">
-                            <div
-                                class="text-xs absolute top-0 right-0 bg-yellow-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-yellow-600 transition duration-500 ease-in-out">
-                                Cooking
-                            </div>
-                        </a>
-                    </div>
-                    <div class="px-6 py-4 mb-auto">
-                        <a href="#"
-                            class="font-medium text-lg inline-block hover:text-yellow-600 transition duration-500 ease-in-out inline-block mb-2">Why
-                            to eat salad?</a>
-                        <p class="text-gray-500 text-sm">
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                        </p>
-                    </div>
-                    <div class="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg height="13px" width="13px" version="1.1" id="Layer_1"
-                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                                y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;"
-                                xml:space="preserve">
-                                <g>
-                                    <g>
-                                        <path
-                                            d="M256,0C114.837,0,0,114.837,0,256s114.837,256,256,256s256-114.837,256-256S397.163,0,256,0z M277.333,256 c0,11.797-9.536,21.333-21.333,21.333h-85.333c-11.797,0-21.333-9.536-21.333-21.333s9.536-21.333,21.333-21.333h64v-128 c0-11.797,9.536-21.333,21.333-21.333s21.333,9.536,21.333,21.333V256z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <span class="ml-1">16 hours ago</span>
-                        </span>
-
-                        <span href="#" class="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center">
-                            <svg class="h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z">
-                                </path>
-                            </svg>
-                            <span class="ml-1">9 Comments</span>
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
     </div>
 </x-app-layout>

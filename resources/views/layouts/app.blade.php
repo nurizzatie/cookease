@@ -37,6 +37,8 @@
             }
         </style>
     </head>
+    <script src="//unpkg.com/alpinejs" defer></script>
+
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-white-100">
             @include('layouts.navigation')
@@ -59,7 +61,7 @@
     <footer class="bg-white rounded-lg shadow-sm">
         <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
             <hr class="my-6 border-yellow-600 sm:mx-auto lg:my-8" />
-            <span class="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2025 <a href="https://flowbite.com/" class="hover:underline">CookEase</a>. All Rights Reserved.</span>
+            <span class="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2025 <a href="{{ route('dashboard') }}" class="hover:underline">CookEase</a>. All Rights Reserved.</span>
         </div>
     </footer>
 </html>

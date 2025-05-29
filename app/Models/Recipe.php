@@ -12,11 +12,14 @@ class Recipe extends Model
     protected $fillable = [
         'name',
         'description',
+        'instructions',
+        'ingredients',
         'duration',
         'difficulty',
+        'servings',
         'calories',
         'image',
-        'insructions',
+        'grocery_lists',
     ];
 
     protected $casts = [
@@ -34,4 +37,8 @@ class Recipe extends Model
         return $this->hasMany(MealPlan::class);
     }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
 }

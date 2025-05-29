@@ -16,7 +16,7 @@
                     @foreach ($recipes as $index => $recipe)
                         <div x-show="{{ $index }} < visible" class="rounded overflow-hidden shadow-lg flex flex-col">
                             <div class="relative h-48 w-full overflow-hidden">
-                                <a href="{{ route('recipe.detail', ['index' => $index]) }}">
+                                <a href="{{ route('recipe.detail', ['index' => $index, 'from' => 'session']) }}">
                                     <img 
                                         src="{{ $recipe['image'] }}" 
                                         alt="recipe image"
@@ -26,7 +26,7 @@
                                 </a>
                             </div>
                             <div class="px-6 py-4 mb-auto">
-                                <a href="{{ route('recipe.detail', ['index' => $index]) }}"
+                                <a href="{{ route('recipe.detail', ['index' => $index, 'from' => 'session']) }}"
                                    class="font-medium text-lg inline-block hover:text-indigo-600 transition mb-2">
                                     {{ $recipe['name'] }}
                                 </a>
