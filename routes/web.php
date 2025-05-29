@@ -134,7 +134,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/meal-plan', [MealPlanController::class, 'index'])->name('meal-plan.index');
     Route::post('/meal-plan', [MealPlanController::class, 'store'])->name('meal-plan.store');
     Route::delete('/meal-plan/{mealPlan}', [MealPlanController::class, 'destroy'])->name('meal-plan.destroy');
+    Route::post('/meal-plan/store-generated', [MealPlanController::class, 'storeFromGenerated'])->name('meal-plan.storeGenerated');
+    Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.showSaved');
+    Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.saved.detail');
+    
 });
+
+// Route::get('/recipe-saved-/{id}', function ($id) {
+//     $recipe = \App\Models\Recipe::findOrFail($id);
+
+//     return view('recipe-saved', ['recipe' => $recipe]);
+// })->name('recipe.saved.detail');
 
 
 

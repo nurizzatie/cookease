@@ -37,6 +37,8 @@
             }
         </style>
     </head>
+    <script src="//unpkg.com/alpinejs" defer></script>
+
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-white-100">
             @include('layouts.navigation')

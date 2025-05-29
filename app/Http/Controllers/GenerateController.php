@@ -53,6 +53,7 @@ class GenerateController extends Controller
         $userId = Auth::id(); // safer kalau Auth::user() not logged in
 
         // Get recent ingredients used by the user (last 5)
+
         $recentIngredients = DB::table('ingredient_usage')
         ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
         ->where('ingredient_usage.user_id', $userId)
@@ -61,6 +62,16 @@ class GenerateController extends Controller
         ->limit(5)
         ->pluck('ingredients.name')
         ->toArray();
+
+      $recentIngredients = DB::table('ingredient_usage')
+    ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
+    ->where('ingredient_usage.user_id', 2)
+    ->select('ingredients.name')
+    ->orderBy('ingredient_usage.used_at', 'desc')
+    ->limit(5)
+    ->pluck('ingredients.name')
+    ->toArray();
+
 
             // Get most frequent ingredients used by the user
             $frequentIngredients = DB::table('ingredient_usage')

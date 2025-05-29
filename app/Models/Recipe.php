@@ -12,13 +12,13 @@ class Recipe extends Model
     protected $fillable = [
         'name',
         'description',
-        'duration',
-        'servings',
-        'difficulty',
-        'calories',
-        'image',
         'instructions',
         'ingredients',
+        'duration',
+        'difficulty',
+        'servings',
+        'calories',
+        'image',
         'grocery_lists',
     ];
 
@@ -41,5 +41,4 @@ class Recipe extends Model
     {
         return $this->hasMany(Favorite::class);
     }
-
 }
