@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 class GenerateController extends Controller
 {
     public function process(Request $request)
+{
+    $userId = Auth::id();
+    $rawIngredients = $request->input('ingredients');
     {
         $userId = Auth::id();
         $rawIngredients = $request->input('ingredients');
@@ -47,7 +50,7 @@ class GenerateController extends Controller
         return back()->with('message', 'Ingredients saved successfully.');
     }
 
-
+}
     public function showForm()
     {
         $userId = Auth::id(); // safer kalau Auth::user() not logged in
@@ -72,6 +75,15 @@ class GenerateController extends Controller
     ->pluck('ingredients.name')
     ->toArray();
 
+        // Get most frequent ingredients used by the user
+        $frequentIngredients = DB::table('ingredient_usage')
+            ->join('ingredients', 'ingredient_usage.ingredient_id', '=', 'ingredients.id')
+            ->where('ingredient_usage.user_id', Auth::id())
+            ->select('ingredients.name', DB::raw('count(*) as total'))
+            ->groupBy('ingredients.name')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get(); // 💡 Leave as collection to pluck in Blade
 
             // Get most frequent ingredients used by the user
             $frequentIngredients = DB::table('ingredient_usage')
