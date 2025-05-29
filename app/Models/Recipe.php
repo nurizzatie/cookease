@@ -13,10 +13,13 @@ class Recipe extends Model
         'name',
         'description',
         'duration',
+        'servings',
         'difficulty',
         'calories',
         'image',
-        'insructions',
+        'instructions',
+        'ingredients',
+        'grocery_lists',
     ];
 
     protected $casts = [
@@ -32,6 +35,11 @@ class Recipe extends Model
     public function mealPlans()
     {
         return $this->hasMany(MealPlan::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
     }
 
 }
