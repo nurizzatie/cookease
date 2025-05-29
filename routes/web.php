@@ -14,9 +14,7 @@ use App\Models\Favorite;
 use App\Models\Recipe;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\MealPlanController;
-
-
-
+use App\Models\MealPlan;
 
 // 🔐 Authenticated user routes
 Route::middleware(['auth'])->group(function () {
@@ -52,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
         $isSession = request()->query('from') === 'session';
         $user = Auth::user();
         $isFavorited = false;
+        $isPlanned = false;
+        $recipeId = null;
 
         if ($isSession) {
             $recipes = session('generated_recipes', []);
@@ -66,8 +66,14 @@ Route::middleware(['auth'])->group(function () {
                 ->first();
 
             if ($existing && $user) {
+                $recipeId = $existing->id;
+
                 $isFavorited = Favorite::where('user_id', $user->id)
-                    ->where('recipe_id', $existing->id)
+                    ->where('recipe_id', $recipeId)
+                    ->exists();
+                   
+                $isPlanned = MealPlan::where('user_id', $user->id)
+                    ->where('recipe_id', $recipeId)
                     ->exists();
             }
 
@@ -75,6 +81,8 @@ Route::middleware(['auth'])->group(function () {
                 'recipe' => $recipe,
                 'isSession' => true,
                 'isFavorited' => $isFavorited,
+                'isPlanned' => $isPlanned,
+                'recipeId' => $recipeId,
             ]);
         }
 
@@ -99,6 +107,10 @@ Route::middleware(['auth'])->group(function () {
             $isFavorited = Favorite::where('user_id', $user->id)
                 ->where('recipe_id', $recipe->id)
                 ->exists();
+
+            $isPlanned = MealPlan::where('user_id', $user->id)
+            ->where('recipe_id', $recipe->id)
+            ->exists();
         }
 
         return view('recipe-detail', [
@@ -106,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
             'isSession' => false,
             'isFavorited' => $isFavorited,
             'recipeId' => $recipe->id,
+            'isPlanned' => $isPlanned,
         ]);
     })->name('recipe.detail');
 
@@ -136,6 +149,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/meal-plan', [MealPlanController::class, 'index'])->name('meal-plan.index');
     Route::post('/meal-plan', [MealPlanController::class, 'store'])->name('meal-plan.store');
     Route::delete('/meal-plan/{mealPlan}', [MealPlanController::class, 'destroy'])->name('meal-plan.destroy');
+    Route::post('/meal-plan/add', [MealPlanController::class, 'storeMeal'])->name('meal-plan.add');
     Route::post('/meal-plan/store-generated', [MealPlanController::class, 'storeFromGenerated'])->name('meal-plan.storeGenerated');
     Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.showSaved');
     Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.saved.detail');

@@ -23,58 +23,52 @@
             <img src="{{ $recipe['image'] }}" alt="recipe image" class="w-full h-64 object-cover rounded mb-6">
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-8">
-                <p><strong>Duration:</strong> {{ $recipe['duration'] }}</p>
-                <p><strong>Servings:</strong> {{ $recipe['servings'] }}</p>
-                <p><strong>Difficulty:</strong> {{ ucfirst($recipe['difficulty']) }}</p>
-                <p><strong>Calories:</strong> {{ $recipe['calories'] ?? 'N/A' }} kcal</p>
+                <p><strong>⏱ Duration:</strong> {{ $recipe['duration'] }}</p>
+                <p><strong>🍽 Servings:</strong> {{ $recipe['servings'] }}</p>
+                <p><strong>📊 Difficulty:</strong> {{ ucfirst($recipe['difficulty']) }}</p>
+                <p><strong>🔥 Calories:</strong> {{ $recipe['calories'] ?? 'N/A' }} kcal</p>
             </div>
 
-            <h3 class="text-lg font-semibold mb-2">Description</h3>
+            <h3 class="text-lg font-semibold mb-2">📝 Description</h3>
             <p class="text-gray-700 mb-4">{{ $recipe['description'] }}</p>
 
-            <h3 class="text-lg font-semibold mb-2">Ingredients</h3>
+            <h3 class="text-lg font-semibold mb-2">🥗 Ingredients</h3>
             <ul class="list-disc pl-5 text-gray-700 mb-4">
                 @foreach ($recipe['ingredients'] as $ingredient)
                     <li>{{ is_array($ingredient) ? implode(' ', $ingredient) : $ingredient }}</li>
                 @endforeach
             </ul>
 
-            <h3 class="text-lg font-semibold">Instructions</h3>
+            <h3 class="text-lg font-semibold">👨‍🍳 Instructions</h3>
             <p class="text-gray-700 whitespace-pre-line">
                 {{ is_array($recipe['instructions']) ? implode("\n", $recipe['instructions']) : $recipe['instructions'] }}
             </p>
 
-            <div class="mt-8 flex flex-wrap gap-2">
-                <!-- Generate Shopping List -->
-                <button onclick="handleGroceryList()"
-                    class="text-sm bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                    Generate Shopping List
-                </button>
+            <div class="mt-8 flex justify-end">
+                <div class="flex space-x-2">
+                    <!-- Hidden textarea for copying -->
+                    <textarea id="groceryListText" class="hidden"></textarea>
 
-                <!-- Save / Unsave -->
-                @if ($isSession)
-                    <form method="POST" action="{{ route('recipe.save') }}">
-                        @csrf
-                        <input type="hidden" name="name" value="{{ $recipe['name'] }}">
-                        <input type="hidden" name="description" value="{{ $recipe['description'] }}">
-                        <input type="hidden" name="duration" value="{{ $recipe['duration'] }}">
-                        <input type="hidden" name="servings" value="{{ $recipe['servings'] }}">
-                        <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
-                        <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
-                        <input type="hidden" name="image" value="{{ $recipe['image'] }}">
-                        <input type="hidden" name="instructions" value="{{ is_array($recipe['instructions']) ? implode("\n", $recipe['instructions']) : $recipe['instructions'] }}">
-                        <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
-                        <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
-                        <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save</button>
-                    </form>
-                @else
-                    @if ($isFavorited && isset($recipeId))
-                        <form method="POST" action="{{ route('recipe.unsave', $recipeId) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-sm bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Unsave</button>
-                        </form>
-                    @else
+                    <!-- Copy to Clipboard Confirmation -->
+                    <div id="copyMessage" class="hidden text-green-600 mt-2 font-medium">Copied to clipboard! ✅</div>
+                    
+                    <!-- 🛒 Dropdown Grocery List Actions -->
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="text-sm bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                            🛒 Generate Shopping List
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" class="absolute z-10 mt-2 w-56 bg-white rounded shadow">
+                            <button onclick="printGroceryList()" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">🖨️ Print</button>
+                            <button onclick="copyGroceryList()" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">📋 Copy to Clipboard</button>
+                            <a href="https://wa.me/?text={{ urlencode('🛒 CookEase Shopping List:' . "\n- " . implode("\n- ", $recipe['groceryLists'])) }}" 
+                                target="_blank" 
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">📤 Share on WhatsApp</a>
+                        </div>
+                    </div>
+
+                    <!-- Save / Unsave -->
+                    @if ($isSession)
                         <form method="POST" action="{{ route('recipe.save') }}">
                             @csrf
                             <input type="hidden" name="name" value="{{ $recipe['name'] }}">
@@ -84,41 +78,57 @@
                             <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
                             <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
                             <input type="hidden" name="image" value="{{ $recipe['image'] }}">
-                            <input type="hidden" name="instructions" value="{{ $recipe['instructions'] }}">
+                            <input type="hidden" name="instructions" value="{{ is_array($recipe['instructions']) ? implode("\n", $recipe['instructions']) : $recipe['instructions'] }}">
                             <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
                             <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
                             <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save</button>
                         </form>
+                    @else
+                        @if ($isFavorited && isset($recipeId))
+                            <form method="POST" action="{{ route('recipe.unsave', $recipeId) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-sm bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">💔 Unsave</button>
+                            </form>
+                        @else
+                            <form method="POST" action="{{ route('recipe.save') }}">
+                                @csrf
+                                <input type="hidden" name="name" value="{{ $recipe['name'] }}">
+                                <input type="hidden" name="description" value="{{ $recipe['description'] }}">
+                                <input type="hidden" name="duration" value="{{ $recipe['duration'] }}">
+                                <input type="hidden" name="servings" value="{{ $recipe['servings'] }}">
+                                <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
+                                <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
+                                <input type="hidden" name="image" value="{{ $recipe['image'] }}">
+                                <input type="hidden" name="instructions" value="{{ $recipe['instructions'] }}">
+                                <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
+                                <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
+                                <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">🤍 Save</button>
+                            </form>
+                        @endif
                     @endif
-                @endif
 
-                <!-- Add to Plan Button -->
-                <button type="button"
-                    onclick="document.getElementById('addToPlanModal').classList.remove('hidden')"
-                    class="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Add to Meal Plan
-                </button>
-
-                <!-- Share to WhatsApp -->
-                @php
-                    $ingredients = implode("%0A- ", $recipe['groceryLists']);
-                    $waMessage = "CookEase Shopping List:%0A- " . $ingredients;
-                @endphp
-
-                <a href="https://wa.me/?text={{ $waMessage }}" target="_blank"
-                    class="text-sm bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
-                    Share on WhatsApp
-                </a>
+                    <!-- Add to Plan Button -->
+                    @if ($isPlanned ?? false)
+                        <a href="{{ route('meal-plan.index') }}"
+                            class="text-sm bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-200">
+                            📅 View Meal Plans
+                        </a>
+                    @else
+                        <button type="button"
+                            onclick="document.getElementById('addToPlanModal').classList.remove('hidden')"
+                            class="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                            📅 Add to Meal Plan
+                        </button>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Grocery Textarea -->
-    <textarea id="groceryListText" class="hidden"></textarea>
-
     <!-- Hidden Printable Section -->
     <div id="printableGroceryList" class="hidden print:block p-6 max-w-md mx-auto bg-white">
-        <h2 class="text-xl font-bold mb-4">Grocery Shopping List</h2>
+        <h2 class="text-xl font-bold mb-4">🛒 Grocery Shopping List</h2>
         <ul class="list-disc pl-6 text-gray-800 space-y-1">
             @foreach ($recipe['groceryLists'] as $item)
                 <li>{{ ucfirst($item) }}</li>
@@ -135,43 +145,37 @@
 
             <h2 class="text-lg font-semibold text-gray-800 mb-4">Add This Recipe to Your Meal Plan</h2>
 
-            <form id="addToPlanForm" method="POST" action="{{ route('meal-plan.storeGenerated') }}">
+            <form method="POST" action="{{ route('meal-plan.add') }}">
                 @csrf
                 <input type="hidden" name="name" value="{{ $recipe['name'] }}">
                 <input type="hidden" name="description" value="{{ $recipe['description'] }}">
-                <input type="hidden" name="instructions" value="{{ $recipe['instructions'] }}">
-                @foreach ($recipe['ingredients'] ?? [] as $ingredient)
-                    <input type="hidden" name="ingredients[]" value="{{ $ingredient }}">
-                @endforeach
                 <input type="hidden" name="duration" value="{{ $recipe['duration'] }}">
-                <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
                 <input type="hidden" name="servings" value="{{ $recipe['servings'] }}">
+                <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
                 <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
                 <input type="hidden" name="image" value="{{ $recipe['image'] }}">
+                <input type="hidden" name="instructions" value="{{ $recipe['instructions'] }}">
+                <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
+                <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
 
-                <label class="block mb-3">
-                    <span class="text-sm text-gray-700">Date</span>
-                    <input type="date" name="date" required
-                        class="w-full mt-1 border rounded px-3 py-2 text-sm text-gray-800">
-                </label>
-
-                <label class="block mb-4">
-                    <span class="text-sm text-gray-700">Meal Type</span>
-                    <select name="meal_type" required
-                        class="w-full mt-1 border rounded px-3 py-2 text-sm text-gray-800">
-                        <option value="">Select Meal Type</option>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Meal Type</label>
+                    <select name="meal_type" class="w-full border rounded px-3 py-2" required>
+                        <option value="">-- Select Meal Type --</option>
                         <option value="breakfast">Breakfast</option>
                         <option value="lunch">Lunch</option>
                         <option value="dinner">Dinner</option>
-                        <option value="snack">Snacks</option>
+                        <option value="others">Snacks</option>
                     </select>
-                </label>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" name="date" class="w-full border rounded px-3 py-2" required>
+                </div>
 
                 <div class="flex justify-end">
-                    <button type="submit"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">
-                        Add to Plan
-                    </button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">Add to plan</button>
                 </div>
             </form>
         </div>
@@ -207,7 +211,14 @@
         const groceryItems = @json($recipe['groceryLists']);
         const groceryText = "CookEase Shopping List:\n\n" + groceryItems.map(item => "- " + item).join("\n");
 
-        function handleGroceryList() {
+        function printGroceryList() {
+            const printable = document.getElementById('printableGroceryList');
+            printable.classList.remove('hidden');
+            window.print();
+            setTimeout(() => printable.classList.add('hidden'), 100);
+        }
+
+        function copyGroceryList() {
             const textarea = document.getElementById('groceryListText');
             textarea.value = groceryText;
             textarea.classList.remove('hidden');
@@ -216,49 +227,8 @@
             textarea.classList.add('hidden');
 
             const message = document.getElementById('copyMessage');
-            if (message) {
-                message.classList.remove('hidden');
-                setTimeout(() => message.classList.add('hidden'), 2000);
-            }
-
-            const printable = document.getElementById('printableGroceryList');
-            printable.classList.remove('hidden');
-            window.print();
-            setTimeout(() => printable.classList.add('hidden'), 100);
+            message.classList.remove('hidden');
+            setTimeout(() => message.classList.add('hidden'), 2000);
         }
-
-        document.getElementById('addToPlanForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-
-            fetch("{{ route('meal-plan.storeGenerated') }}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
-                },
-                body: formData
-            })
-            .then(async response => {
-                const data = await response.json();
-                if (!response.ok) {
-                    document.getElementById('errorDetail').innerText = data.message || 'Something went wrong.';
-                    document.getElementById('errorMessage').classList.remove('hidden');
-                    setTimeout(() => {
-                        document.getElementById('errorMessage').classList.add('hidden');
-                    }, 5000);
-                    throw new Error(data.message);
-                }
-
-                document.getElementById('addToPlanModal').classList.add('hidden');
-                document.getElementById('successMessage').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('successMessage').classList.add('hidden');
-                }, 4000);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        });
     </script>
 </x-app-layout>

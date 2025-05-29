@@ -65,12 +65,12 @@
                     <div class="bg-yellow-100 shadow rounded-2xl p-4 flex flex-col h-full">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg sm:text-xl md:text-xl font-semibold">📆 Today's Meal Plan</h2>
-                            <a href="#" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
+                            <a href="{{ route('meal-plan.index') }}" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
                         </div>
                         <ul class="space-y-2 flex-1">
                         @forelse ($todaysPlans as $plan)
                             <li class="border p-3 rounded-lg">
-                                🍽 {{ ucfirst($plan->meal_type) }}: {{ $plan->recipe->name ?? 'N/A' }}
+                                <a href="{{ route('recipe.detail', $plan->recipe->id)  }}">🍽 {{ ucfirst($plan->meal_type) }}: {{ $plan->recipe->name ?? 'N/A' }}</a>
                             </li>
                         @empty
                             <li class="text-gray-500">No meals planned for today.</li>

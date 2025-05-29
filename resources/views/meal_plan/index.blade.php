@@ -29,7 +29,7 @@
             </div>
 
             @php
-                $categories = ['breakfast' => '🍳 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner', 'snack' => '🍪 Snacks'];
+                $categories = ['breakfast' => '🍳 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner', 'others' => '🍪 Snacks'];
             @endphp
 
             @foreach ($categories as $key => $label)
@@ -77,14 +77,14 @@
                                 </div>
 
                                 <!-- Card Content -->
-                                <a href="{{ route('recipe.saved.detail', ['id' => $recipe->id]) }}">
+                                <a href="{{ route('recipe.detail', $recipe->id) }}">
                                     <div class="relative h-48 w-full overflow-hidden">
                                         <img src="{{ $recipe->image }}" alt="recipe image" class="w-full h-full object-cover">
                                         <div class="absolute inset-0 bg-black bg-opacity-20 hover:bg-opacity-5 transition duration-300"></div>
                                     </div>
                                 </a>
                                 <div class="px-6 py-4 mb-auto">
-                                    <a href="{{ route('recipe.saved.detail', ['id' => $recipe->id]) }}"
+                                    <a href="{{ route('recipe.detail', $recipe->id) }}"
                                        class="font-medium text-lg inline-block hover:text-indigo-600 transition mb-2">
                                         {{ $recipe->name }}
                                     </a>
@@ -119,7 +119,7 @@
                     <option value="breakfast" {{ $meal->meal_type === 'breakfast' ? 'selected' : '' }}>Breakfast</option>
                     <option value="lunch" {{ $meal->meal_type === 'lunch' ? 'selected' : '' }}>Lunch</option>
                     <option value="dinner" {{ $meal->meal_type === 'dinner' ? 'selected' : '' }}>Dinner</option>
-                    <option value="snack" {{ $meal->meal_type === 'snack' ? 'selected' : '' }}>Snack</option>
+                    <option value="others" {{ $meal->meal_type === 'others' ? 'selected' : '' }}>Snack</option>
                 </select>
             </div>
 

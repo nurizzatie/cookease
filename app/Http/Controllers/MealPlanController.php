@@ -34,6 +34,41 @@ class MealPlanController extends Controller
         return view('meal_plan.index', compact('plans', 'recipes', 'date', 'availableDates'));
     }
 
+    public function storeMeal(Request $request)
+    {
+        $request->validate([
+            'meal_type' => 'required|in:breakfast,lunch,dinner,others',
+            'date' => 'required|date',
+        ]);
+
+        $data = $request->all();
+
+        // Save or find the recipe
+        $recipe = Recipe::firstOrCreate(
+            ['name' => $data['name'], 'description' => $data['description']],
+            [
+                'duration'       => $data['duration'] ?? null,
+                'servings'       => $data['servings'] ?? null,
+                'difficulty'     => $data['difficulty'] ?? 'easy',
+                'calories'       => $data['calories'] ?? null,
+                'image'          => $data['image'] ?? null,
+                'ingredients'    => json_encode($data['ingredients']),
+                'instructions'   => $data['instructions'],
+                'grocery_lists'  => json_encode($data['groceryLists']),
+            ]
+        );
+
+        // Create meal plan
+        MealPlan::create([
+            'user_id'   => Auth::id(),
+            'recipe_id' => $recipe->id,
+            'meal_type' => $data['meal_type'],
+            'date'      => $data['date'],
+        ]);
+
+        return back()->with('message', 'Recipe added to your meal plan!');
+    }
+
     // Store new meal plan entry
     public function store(Request $request)
     {
@@ -125,7 +160,7 @@ class MealPlanController extends Controller
             'description' => $request->description,
             'instructions' => $request->instructions,
             'ingredients' => json_encode($request->ingredients),
-            'groceryLists' => json_encode($ingredientNames),
+            'grocery_lists' => json_encode($ingredientNames),
             'duration' => $request->duration,
             'difficulty' => $request->difficulty,
             'servings' => $request->servings,
