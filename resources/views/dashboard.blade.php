@@ -62,20 +62,42 @@
                     </div>
 
                     <!-- Today's Meal Plan -->
-                    <div class="bg-yellow-100 shadow rounded-2xl p-4 flex flex-col h-full">
+                    <div class="bg-yellow-50 shadow rounded-2xl p-4 flex flex-col h-full">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg sm:text-xl md:text-xl font-semibold">📆 Today's Meal Plan</h2>
                             <a href="{{ route('meal-plan.index') }}" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
                         </div>
-                        <ul class="space-y-2 flex-1">
-                        @forelse ($todaysPlans as $plan)
-                            <li class="border p-3 rounded-lg">
-                                <a href="{{ route('recipe.detail', $plan->recipe->id)  }}">🍽 {{ ucfirst($plan->meal_type) }}: {{ $plan->recipe->name ?? 'N/A' }}</a>
-                            </li>
-                        @empty
-                            <li class="text-gray-500">No meals planned for today.</li>
-                        @endforelse
-                        </ul>
+                        <ul class="space-y-3 flex-1">
+
+                         <ul class="space-y-3 flex-1">
+@php
+    $icons = [
+        'breakfast' => '🌞',
+        'lunch' => '🥗',
+        'dinner' => '🌙',
+        'snack' => '🍪',
+    ];
+@endphp
+
+@forelse ($todaysPlans as $plan)
+    @if ($plan->recipe)
+        <a href="{{ route('recipe.detail', $plan->recipe->id) }}" class="block">
+            <li class="p-4 bg-white border border-yellow-200 backdrop-blur-md rounded-xl shadow hover:scale-[1.01] hover:shadow-md transition-all duration-200 cursor-pointer">
+                <div class="flex items-center gap-3 text-gray-800">
+                    <span class="text-2xl">{{ $icons[$plan->meal_type] ?? '🍴' }}</span>
+                    <div class="text-sm sm:text-base">
+                        <span class="font-semibold capitalize">{{ $plan->meal_type }}:</span>
+                        <span>{{ $plan->recipe->name }}</span>
+                    </div>
+                </div>
+            </li>
+        </a>
+    @endif
+@empty
+    <li class="text-gray-400 italic">No meals planned for today. ✨</li>
+@endforelse
+</ul>
+
                     </div>
 
                     <!-- Recently Saved Recipes -->

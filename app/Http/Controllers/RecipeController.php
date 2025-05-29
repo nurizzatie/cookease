@@ -51,7 +51,10 @@ class RecipeController extends Controller
                 'image'          => $data['image'] ?? null,
                 'ingredients'    => json_encode($data['ingredients']),
                 'instructions'   => $data['instructions'],
-                'grocery_lists'  => json_encode($data['groceryLists']),
+                'grocery_lists' => isset($data['groceryLists']) 
+    ? json_encode($data['groceryLists']) 
+    : json_encode($data['ingredients']), // fallback from ingredients
+
             ]
         );
 
@@ -78,4 +81,12 @@ class RecipeController extends Controller
 
         return back()->with('message', 'Recipe removed from favorites.');
     }
+
+    public function show($id)
+{
+    $recipe = Recipe::findOrFail($id);
+    return view('recipe-detail', compact('recipe'));
+
+}
+
 }
