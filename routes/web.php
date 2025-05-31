@@ -99,9 +99,9 @@ Route::middleware(['auth'])->group(function () {
             'difficulty'   => $recipe->difficulty,
             'calories'     => $recipe->calories,
             'image'        => $recipe->image,
-            'ingredients'  => is_array($recipe->ingredients) ? $recipe->ingredients : json_decode(json_decode($recipe->ingredients, true), true),
+            'ingredients'  => is_array($recipe->ingredients) ? $recipe->ingredients : json_decode($recipe->ingredients, true),
             'instructions' => $recipe->instructions,
-            'groceryLists' => is_array($recipe->grocery_lists) ? $recipe->grocery_lists : json_decode(json_decode($recipe->grocery_lists, true), true),
+            'groceryLists' => is_array($recipe->grocery_lists) ? $recipe->grocery_lists : json_decode($recipe->grocery_lists, true),
         ];
 
         // Check if user favorited this recipe

@@ -28,12 +28,43 @@
                     <x-nav-link :href="route('meal-plan.index')" :active="request()->routeIs('meal-plan.index')">
                         {{ __('Meal Plans') }}
                     </x-nav-link>
-
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Notification & Settings Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
+
+                @auth
+                <!-- Notifications Dropdown -->
+                <div class="relative" x-data="{ openNotif: false }">
+                    <button @click="openNotif = !openNotif" class="relative inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                        🔔
+                        <span class="ml-1">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    </button>
+
+                    <div x-show="openNotif" @click.away="openNotif = false" 
+                         class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 overflow-auto max-h-60 border border-gray-200 dark:border-gray-700">
+                        <ul>
+                            @forelse (auth()->user()->unreadNotifications as $notification)
+                                <li class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                                    <div class="flex justify-between items-center">
+                                        <div>{{ $notification->data['message'] }}</div>
+                                        <form method="POST" action="{{ route('notifications.mark', $notification->id) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-blue-500 hover:underline text-xs ml-2">Mark as read</button>
+                                        </form>
+                                    </div>
+                                </li>
+                            @empty
+                                <li class="px-4 py-2 text-gray-500 dark:text-gray-400">No new notifications.</li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
+                @endauth
+
+                <!-- Settings Dropdown -->
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -84,7 +115,29 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            <!-- Add other links here as needed -->
         </div>
+
+        <!-- Responsive Notifications -->
+        @auth
+        <div class="border-t border-gray-200 dark:border-gray-600 pt-4 pb-1 px-4">
+            <div class="mb-2 font-semibold text-gray-700 dark:text-gray-300">Notifications ({{ auth()->user()->unreadNotifications->count() }})</div>
+            <ul class="space-y-2 max-h-48 overflow-auto">
+                @forelse (auth()->user()->unreadNotifications as $notification)
+                    <li class="text-gray-600 dark:text-gray-400">
+                        {{ $notification->data['message'] }}
+                        <form method="POST" action="{{ route('notifications.mark', $notification->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="text-blue-500 hover:underline text-xs mt-1">Mark as read</button>
+                        </form>
+                    </li>
+                @empty
+                    <li class="text-gray-500 dark:text-gray-400">No new notifications.</li>
+                @endforelse
+            </ul>
+        </div>
+        @endauth
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">

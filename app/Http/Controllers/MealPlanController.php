@@ -7,6 +7,8 @@ use App\Models\Recipe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Notifications\DailyMealPlanReminder;  // ✅ Updated
+use Illuminate\Support\Facades\Notification;
 
 class MealPlanController extends Controller
 {
@@ -43,7 +45,6 @@ class MealPlanController extends Controller
 
         $data = $request->all();
 
-        // Save or find the recipe
         $recipe = Recipe::firstOrCreate(
             ['name' => $data['name'], 'description' => $data['description']],
             [
@@ -58,18 +59,21 @@ class MealPlanController extends Controller
             ]
         );
 
-        // Create meal plan
-        MealPlan::create([
+        $mealPlan = MealPlan::create([
             'user_id'   => Auth::id(),
             'recipe_id' => $recipe->id,
             'meal_type' => $data['meal_type'],
             'date'      => $data['date'],
         ]);
 
+        // ✅ Send custom notification
+        $user = auth()->user();
+        $user->notify(new DailyMealPlanReminder($data['meal_type'], $user->name));
+
+
         return back()->with('message', 'Recipe added to your meal plan!');
     }
 
-    // Store new meal plan entry
     public function store(Request $request)
     {
         $request->validate([
@@ -87,17 +91,21 @@ class MealPlanController extends Controller
             return back()->withErrors(['meal_type' => 'You can only add up to 3 ' . ucfirst($request->meal_type) . ' meals per day.'])->withInput();
         }
 
-        MealPlan::create([
+        $mealPlan = MealPlan::create([
             'user_id' => Auth::id(),
             'recipe_id' => $request->recipe_id,
             'date' => $request->date,
             'meal_type' => $request->meal_type,
         ]);
 
+        // ✅ Send custom notification
+        $user = auth()->user();
+        $user->notify(new DailyMealPlanReminder($request->meal_type, $user->name));
+
+
         return back()->with('message', 'Meal plan added successfully.');
     }
 
-    // Delete a meal plan entry
     public function destroy(MealPlan $mealPlan)
     {
         if ($mealPlan->user_id != Auth::id()) {
@@ -109,7 +117,6 @@ class MealPlanController extends Controller
         return back()->with('message', 'Meal removed.');
     }
 
-    // Store from generated recipe input
     public function storeFromGenerated(Request $request)
     {
         $request->validate([
@@ -175,10 +182,14 @@ class MealPlanController extends Controller
             'meal_type' => $request->meal_type,
         ]);
 
+        // ✅ Send custom notification
+        $user = auth()->user();
+        $user->notify(new DailyMealPlanReminder($request->meal_type, $user->name));
+
+
         return response()->json(['success' => true, 'message' => 'Meal plan added successfully.']);
     }
 
-    // Show saved recipe details
     public function showSaved($id)
     {
         $recipe = Recipe::findOrFail($id);
@@ -188,7 +199,6 @@ class MealPlanController extends Controller
         return view('recipe-saved-detail', ['recipe' => $recipe]);
     }
 
-    // Show edit form (if needed)
     public function edit($id)
     {
         $meal = MealPlan::findOrFail($id);
@@ -197,7 +207,6 @@ class MealPlanController extends Controller
         return view('meal-plan.edit', compact('meal', 'recipes'));
     }
 
-    // Update meal plan
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -208,8 +217,7 @@ class MealPlanController extends Controller
         $meal = MealPlan::findOrFail($id);
         $meal->update($validated);
 
-        // 🛠️ Redirect to index with the newly updated date
-    return redirect()->route('meal-plan.index', ['date' => $validated['date']])
-                     ->with('message', 'Meal updated successfully!');
+        return redirect()->route('meal-plan.index', ['date' => $validated['date']])
+                         ->with('message', 'Meal updated successfully!');
     }
 }
