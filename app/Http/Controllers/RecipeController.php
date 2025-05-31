@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Favorite;
 use Illuminate\Http\Request;
 use App\Models\Recipe;
+use App\Models\Review;
 use Illuminate\Support\Facades\Auth;
 
 class RecipeController extends Controller
@@ -85,7 +86,8 @@ class RecipeController extends Controller
     public function show($id)
 {
     $recipe = Recipe::findOrFail($id);
-    return view('recipe-detail', compact('recipe'));
+    $reviews = Review::where('recipe_id', $id)->get();
+    return view('recipe-detail', compact('recipe', 'reviews'));
 
 }
 

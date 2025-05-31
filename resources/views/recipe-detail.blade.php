@@ -231,4 +231,62 @@
             setTimeout(() => message.classList.add('hidden'), 2000);
         }
     </script>
+
+    <!-- ⭐ Review Section -->
+<div class="max-w-4xl mx-auto mt-10">
+    <div class="bg-white shadow rounded-xl p-6">
+        <h3 class="text-lg font-semibold mb-4">⭐ User Reviews</h3>
+
+        <!-- Leave a Review -->
+        @auth
+            <form action="{{ route('review.store') }}" method="POST" class="mb-6">
+                @csrf
+                <input type="hidden" name="recipe_id" value="{{ $recipeId ?? $recipe['id'] ?? null }}">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Your Rating</label>
+                    <select name="rating" class="w-full border rounded px-3 py-2" required>
+                        <option value="">-- Select Rating --</option>
+                        @for ($i = 5; $i >= 1; $i--)
+                            <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Your Comment</label>
+                    <textarea name="comment" class="w-full border rounded px-3 py-2" rows="3" required></textarea>
+                </div>
+
+                <div class="text-right">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Review</button>
+                </div>
+            </form>
+        @else
+            <p class="text-gray-600 mb-6">Please <a href="{{ route('login') }}" class="text-blue-500 hover:underline">login</a> to leave a review.</p>
+        @endauth
+
+        <!-- Display Reviews -->
+        @forelse ($reviews as $review)
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="text-sm font-semibold text-gray-800">{{ $review->user->name }}</div>
+                    <div class="text-yellow-500 text-sm">
+                        @for ($i = 0; $i < $review->rating; $i++)
+                            ⭐
+                        @endfor
+                    </div>
+                </div>
+                <p class="text-gray-700">{{ $review->comment }}</p>
+                <p class="text-gray-400 text-xs mt-1">Posted on {{ $review->created_at->format('F j, Y') }}</p>
+            </div>
+        @empty
+            <p class="text-gray-600">No reviews yet. Be the first to leave one!</p>
+        @endforelse
+    </div>
+</div>
+
+
 </x-app-layout>
+    
+
