@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-        $table->text('comment')->after('rating');
-    });
-
+        if (!Schema::hasColumn('reviews', 'comment')) {
+            Schema::table('reviews', function (Blueprint $table) {
+                $table->text('comment')->after('rating');
+            });
+        }
     }
 
     /**
@@ -22,9 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-        $table->dropColumn('comment');
-    });
-    
+        if (Schema::hasColumn('reviews', 'comment')) {
+            Schema::table('reviews', function (Blueprint $table) {
+                $table->dropColumn('comment');
+            });
+        }
     }
 };

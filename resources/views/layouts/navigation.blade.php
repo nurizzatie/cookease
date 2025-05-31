@@ -33,7 +33,6 @@
 
             <!-- Notification & Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
-
                 @auth
                 <!-- Notifications Dropdown -->
                 <div class="relative" x-data="{ openNotif: false }">

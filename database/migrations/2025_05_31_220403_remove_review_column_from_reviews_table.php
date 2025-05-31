@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-        $table->dropColumn('review');
-    });
+        if (Schema::hasColumn('reviews', 'review')) {
+            Schema::table('reviews', function (Blueprint $table) {
+                $table->dropColumn('review');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('reviews', function (Blueprint $table) {
-        $table->text('review')->nullable(); // or match the original type
-    });
+        // Add the 'review' column back if you want to rollback this migration
+        if (!Schema::hasColumn('reviews', 'review')) {
+            Schema::table('reviews', function (Blueprint $table) {
+                $table->text('review')->nullable();
+            });
+        }
     }
 };

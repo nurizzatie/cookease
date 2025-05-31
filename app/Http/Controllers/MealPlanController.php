@@ -7,7 +7,7 @@ use App\Models\Recipe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Notifications\DailyMealPlanReminder;  // ✅ Updated
+use App\Notifications\DailyMealPlanReminder;
 use Illuminate\Support\Facades\Notification;
 
 class MealPlanController extends Controller
@@ -66,10 +66,11 @@ class MealPlanController extends Controller
             'date'      => $data['date'],
         ]);
 
-        // ✅ Send custom notification
-        $user = auth()->user();
-        $user->notify(new DailyMealPlanReminder($data['meal_type'], $user->name));
-
+        // Only send notification if the meal plan date is today
+        if ($data['date'] === now()->toDateString()) {
+            $user = auth()->user();
+            $user->notify(new DailyMealPlanReminder($data['meal_type'], $user->name));
+        }
 
         return back()->with('message', 'Recipe added to your meal plan!');
     }
@@ -98,23 +99,12 @@ class MealPlanController extends Controller
             'meal_type' => $request->meal_type,
         ]);
 
-        // ✅ Send custom notification
-        $user = auth()->user();
-        $user->notify(new DailyMealPlanReminder($request->meal_type, $user->name));
-
-
-        return back()->with('message', 'Meal plan added successfully.');
-    }
-
-    public function destroy(MealPlan $mealPlan)
-    {
-        if ($mealPlan->user_id != Auth::id()) {
-            abort(403);
+        if ($request->date === now()->toDateString()) {
+            $user = auth()->user();
+            $user->notify(new DailyMealPlanReminder($request->meal_type, $user->name));
         }
 
-        $mealPlan->delete();
-
-        return back()->with('message', 'Meal removed.');
+        return back()->with('message', 'Meal plan added successfully.');
     }
 
     public function storeFromGenerated(Request $request)
@@ -182,10 +172,10 @@ class MealPlanController extends Controller
             'meal_type' => $request->meal_type,
         ]);
 
-        // ✅ Send custom notification
-        $user = auth()->user();
-        $user->notify(new DailyMealPlanReminder($request->meal_type, $user->name));
-
+        if ($request->date === now()->toDateString()) {
+            $user = auth()->user();
+            $user->notify(new DailyMealPlanReminder($request->meal_type, $user->name));
+        }
 
         return response()->json(['success' => true, 'message' => 'Meal plan added successfully.']);
     }
@@ -219,5 +209,20 @@ class MealPlanController extends Controller
 
         return redirect()->route('meal-plan.index', ['date' => $validated['date']])
                          ->with('message', 'Meal updated successfully!');
+    }
+
+    public function markNotificationAsRead($notificationId)
+    {
+        $user = auth()->user();
+
+        $notification = $user->notifications()->find($notificationId);
+
+        if (!$notification) {
+            return redirect()->back()->with('error', 'Notification not found.');
+        }
+
+        $notification->markAsRead();
+
+        return redirect()->back()->with('success', 'Notification marked as read.');
     }
 }

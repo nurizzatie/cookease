@@ -11,12 +11,13 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenerateController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\MealPlanController;
+use App\Http\Controllers\NotificationController; // Add this for notifications
 use App\Models\Favorite;
 use App\Models\Review;
 use App\Models\Recipe;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\MealPlanController;
 use App\Models\MealPlan;
+use Illuminate\Support\Facades\Auth;
 
 // 🔐 Authenticated user routes
 Route::middleware(['auth'])->group(function () {
@@ -25,13 +26,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/bmi', [ProfileController::class, 'modify'])->name('profile.bmi.edit');
     Route::get('/bmi/form', [BMIController::class, 'showForm'])->name('bmi.form');
     Route::post('/bmi/store', [BMIController::class, 'store'])->name('profile.bmi.update');
-    Route::post('/bmi/update', [BmiController::class, 'update'])->name('bmi.update');
+    Route::post('/bmi/update', [BMIController::class, 'update'])->name('bmi.update');
     Route::get('/health-goals', [HealthGoalController::class, 'create'])->name('health_goals.create');
     Route::post('/health-goals', [HealthGoalController::class, 'store'])->name('health_goals.store');
     Route::get('/profile/health-goal', [HealthGoalController::class, 'show'])->name('health_goals.show');
     Route::put('/profile/health-goal', [HealthGoalController::class, 'update'])->name('health_goals.update');
-
-
 
     // 👤 Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -39,9 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // 🍳 Recipe Generation Flow
-    // Route::get('/generate', fn () => view('generate'))->name('generate');
     Route::get('/generate', [GenerateController::class, 'showForm'])->name('generate');
-
     Route::post('/generate', [IngredientController::class, 'process'])->name('generate.process');
     Route::get('/generate-result', [IngredientController::class, 'showResult'])->name('generate.result');
 
@@ -66,7 +63,6 @@ Route::middleware(['auth'])->group(function () {
             }
             $recipe = $recipes[$index];
 
-            // Check if this recipe is already saved in DB by name + description
             $existing = Recipe::where('name', $recipe['name'])
                 ->where('description', $recipe['description'])
                 ->first();
@@ -77,12 +73,12 @@ Route::middleware(['auth'])->group(function () {
                 $isFavorited = Favorite::where('user_id', $user->id)
                     ->where('recipe_id', $recipeId)
                     ->exists();
-                   
+
                 $isPlanned = MealPlan::where('user_id', $user->id)
                     ->where('recipe_id', $recipeId)
                     ->exists();
 
-                $reviews = \App\Models\Review::where('recipe_id', $recipeId)->latest()->get();
+                $reviews = Review::where('recipe_id', $recipeId)->latest()->get();
             }
 
             return view('recipe-detail', [
@@ -97,7 +93,6 @@ Route::middleware(['auth'])->group(function () {
 
         $recipe = Recipe::findOrFail($index);
 
-        // Decode fields for Blade view
         $recipeArray = [
             'name'         => $recipe->name,
             'description'  => $recipe->description,
@@ -111,18 +106,17 @@ Route::middleware(['auth'])->group(function () {
             'groceryLists' => is_array($recipe->grocery_lists) ? $recipe->grocery_lists : json_decode($recipe->grocery_lists, true),
         ];
 
-        // Check if user favorited this recipe
         if ($user) {
             $isFavorited = Favorite::where('user_id', $user->id)
                 ->where('recipe_id', $recipe->id)
                 ->exists();
 
             $isPlanned = MealPlan::where('user_id', $user->id)
-            ->where('recipe_id', $recipe->id)
-            ->exists();
+                ->where('recipe_id', $recipe->id)
+                ->exists();
         }
 
-        $reviews = \App\Models\Review::where('recipe_id', $recipe->id)->latest()->get();
+        $reviews = Review::where('recipe_id', $recipe->id)->latest()->get();
 
         return view('recipe-detail', [
             'recipe' => $recipeArray,
@@ -137,7 +131,25 @@ Route::middleware(['auth'])->group(function () {
     // Save/Unsave recipe
     Route::post('/save-recipe', [RecipeController::class, 'saveRecipe'])->name('recipe.save');
     Route::delete('/recipe/unsave/{id}', [RecipeController::class, 'unsaveRecipe'])->name('recipe.unsave');
-    Route::get('/saved-recipes', [FavoriteController::class, 'saved'])->middleware('auth')->name('recipes.saved');
+    Route::get('/saved-recipes', [FavoriteController::class, 'saved'])->name('recipes.saved');
+
+    // My Meals Plan
+    Route::get('/meal-plan', [MealPlanController::class, 'index'])->name('meal-plan.index');
+    Route::post('/meal-plan', [MealPlanController::class, 'store'])->name('meal-plan.store');
+    Route::delete('/meal-plan/{mealPlan}', [MealPlanController::class, 'destroy'])->name('meal-plan.destroy');
+    Route::post('/meal-plan/add', [MealPlanController::class, 'storeMeal'])->name('meal-plan.add');
+    Route::post('/meal-plan/store-generated', [MealPlanController::class, 'storeFromGenerated'])->name('meal-plan.storeGenerated');
+    Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.showSaved');
+    Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.saved.detail');
+    Route::get('/meal-plan/{id}/edit', [MealPlanController::class, 'edit'])->name('meal-plan.edit');
+    Route::put('/meal-plan/{id}', [MealPlanController::class, 'update'])->name('meal-plan.update');
+
+    // Notifications mark as read route
+
+    Route::patch('/notifications/{notificationId}/mark', [MealPlanController::class, 'markNotificationAsRead'])
+    ->middleware('auth')
+    ->name('notifications.mark');  // 👈 THIS is the name Laravel is looking for
+
 
 });
 
@@ -156,28 +168,5 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 // 🔍 Dev-only testing view (optional)
 Route::get('/test-filters', fn () => view('test-filters'));
 
-// My Meals Plan
-Route::middleware(['auth'])->group(function () {
-    Route::get('/meal-plan', [MealPlanController::class, 'index'])->name('meal-plan.index');
-    Route::post('/meal-plan', [MealPlanController::class, 'store'])->name('meal-plan.store');
-    Route::delete('/meal-plan/{mealPlan}', [MealPlanController::class, 'destroy'])->name('meal-plan.destroy');
-    Route::post('/meal-plan/add', [MealPlanController::class, 'storeMeal'])->name('meal-plan.add');
-    Route::post('/meal-plan/store-generated', [MealPlanController::class, 'storeFromGenerated'])->name('meal-plan.storeGenerated');
-    Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.showSaved');
-    Route::get('/recipe-saved/{id}', [MealPlanController::class, 'showSaved'])->name('recipe.saved.detail');
-    Route::get('/meal-plan/{id}/edit', [MealPlanController::class, 'edit'])->name('meal-plan.edit');
-Route::put('/meal-plan/{id}', [MealPlanController::class, 'update'])->name('meal-plan.update');
-
-
-});
-
-// Route::get('/recipe-saved-/{id}', function ($id) {
-//     $recipe = \App\Models\Recipe::findOrFail($id);
-
-//     return view('recipe-saved', ['recipe' => $recipe]);
-// })->name('recipe.saved.detail');
-
-
-
+// Require auth routes generated by Breeze or your auth scaffolding
 require __DIR__.'/auth.php';
-
