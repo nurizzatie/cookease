@@ -10,7 +10,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenerateController;
 use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\ReviewController;
 use App\Models\Favorite;
+use App\Models\Review;
 use App\Models\Recipe;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\MealPlanController;
@@ -48,12 +50,14 @@ Route::middleware(['auth'])->group(function () {
 
     // Recipe List and Detail
     Route::get('/browse-recipes', [RecipeController::class, 'browse'])->name('recipes.browse');
+    Route::post('/review', [ReviewController::class, 'store'])->name('review.store');
     Route::get('/recipe-detail/{index}', function ($index) {
         $isSession = request()->query('from') === 'session';
         $user = Auth::user();
         $isFavorited = false;
         $isPlanned = false;
         $recipeId = null;
+        $reviews = [];
 
         if ($isSession) {
             $recipes = session('generated_recipes', []);
@@ -77,6 +81,8 @@ Route::middleware(['auth'])->group(function () {
                 $isPlanned = MealPlan::where('user_id', $user->id)
                     ->where('recipe_id', $recipeId)
                     ->exists();
+
+                $reviews = \App\Models\Review::where('recipe_id', $recipeId)->latest()->get();
             }
 
             return view('recipe-detail', [
@@ -85,6 +91,7 @@ Route::middleware(['auth'])->group(function () {
                 'isFavorited' => $isFavorited,
                 'isPlanned' => $isPlanned,
                 'recipeId' => $recipeId,
+                'reviews' => $reviews
             ]);
         }
 
@@ -115,12 +122,15 @@ Route::middleware(['auth'])->group(function () {
             ->exists();
         }
 
+        $reviews = \App\Models\Review::where('recipe_id', $recipe->id)->latest()->get();
+
         return view('recipe-detail', [
             'recipe' => $recipeArray,
             'isSession' => false,
             'isFavorited' => $isFavorited,
             'recipeId' => $recipe->id,
             'isPlanned' => $isPlanned,
+            'reviews' => $reviews,
         ]);
     })->name('recipe.detail');
 

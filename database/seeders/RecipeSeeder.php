@@ -30,6 +30,7 @@ class RecipeSeeder extends Seeder
             'grocery_lists' => json_encode(json_encode([
                 'rice', 'coconut milk', 'anchovies', 'eggs', 'cucumber'
             ])),
+         
         ]);
 
         Recipe::create([
@@ -57,6 +58,7 @@ class RecipeSeeder extends Seeder
                 'chicken', 'coconut milk', 'lemongrass', 'galangal', 'turmeric powder',
                 'coriander powder', 'garlic', 'onion', 'ginger', 'salt', 'cooking oil'
             ])),
+            
         ]);
 
         Recipe::create([
@@ -92,6 +94,7 @@ class RecipeSeeder extends Seeder
                 'egg',
                 'lime'
             ])),
+            
         ]);
 
         Recipe::create([
@@ -127,6 +130,7 @@ class RecipeSeeder extends Seeder
                 'salt',
                 'sugar'
             ])),
+            
         ]);
     }
 }
