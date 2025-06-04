@@ -39,7 +39,7 @@ class MealPlanController extends Controller
     public function storeMeal(Request $request)
     {
         $request->validate([
-            'meal_type' => 'required|in:breakfast,lunch,dinner,others',
+            'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
             'date' => 'required|date',
         ]);
 
@@ -201,7 +201,7 @@ class MealPlanController extends Controller
     {
         $validated = $request->validate([
             'date' => 'required|date',
-            'meal_type' => 'required|string',
+            'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
         ]);
 
         $meal = MealPlan::findOrFail($id);
@@ -210,6 +210,14 @@ class MealPlanController extends Controller
         return redirect()->route('meal-plan.index', ['date' => $validated['date']])
                          ->with('message', 'Meal updated successfully!');
     }
+
+    public function destroy(MealPlan $mealPlan)
+{
+    $mealPlan->delete();
+
+    return back()->with('message', 'Meal removed successfully.');
+}
+
 
     public function markNotificationAsRead($notificationId)
     {

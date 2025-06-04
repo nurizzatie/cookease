@@ -1,8 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ $recipe['name'] }}
-        </h2>
+        
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        {{ $recipe['name'] }}
+    </h2>
     </x-slot>
 
     @if (session('message'))
@@ -32,12 +33,19 @@
             <h3 class="text-lg font-semibold mb-2">📝 Description</h3>
             <p class="text-gray-700 mb-4">{{ $recipe['description'] }}</p>
 
-            <h3 class="text-lg font-semibold mb-2">🥗 Ingredients</h3>
-            <ul class="list-disc pl-5 text-gray-700 mb-4">
-                @foreach ($recipe['ingredients'] as $ingredient)
-                    <li>{{ is_array($ingredient) ? implode(' ', $ingredient) : $ingredient }}</li>
-                @endforeach
-            </ul>
+           <h3 class="text-lg font-semibold mb-2">🥗 Ingredients</h3>
+<ul class="list-disc pl-5 text-gray-700 mb-4">
+    @php
+        $ingredients = is_array($recipe['ingredients'])
+            ? $recipe['ingredients']
+            : json_decode($recipe['ingredients'], true) ?? [];
+    @endphp
+
+    @foreach ($ingredients as $ingredient)
+        <li>{{ is_array($ingredient) ? implode(' ', $ingredient) : $ingredient }}</li>
+    @endforeach
+</ul>
+
 
             <h3 class="text-lg font-semibold">👨‍🍳 Instructions</h3>
             <p class="text-gray-700 whitespace-pre-line">
@@ -61,52 +69,61 @@
                         <div x-show="open" @click.away="open = false" class="absolute z-10 mt-2 w-56 bg-white rounded shadow">
                             <button onclick="printGroceryList()" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">🖨️ Print</button>
                             <button onclick="copyGroceryList()" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">📋 Copy to Clipboard</button>
-                            <a href="https://wa.me/?text={{ urlencode('🛒 CookEase Shopping List:' . "\n- " . implode("\n- ", $recipe['groceryLists'])) }}" 
-                                target="_blank" 
-                                class="block px-4 py-2 text-sm hover:bg-gray-100">📤 Share on WhatsApp</a>
+                            <a href="https://wa.me/?text={{ urlencode('🛒 CookEase Shopping List:' . "\n- " . implode("\n- ", is_array($recipe['groceryLists']) ? $recipe['groceryLists'] : json_decode($recipe['groceryLists'] ?? '[]', true))) }}"
+   target="_blank"
+   class="block px-4 py-2 text-sm hover:bg-gray-100">
+   📤 Share on WhatsApp
+</a>
+
                         </div>
                     </div>
 
                     <!-- Save / Unsave -->
-                    @if ($isSession)
-                        <form method="POST" action="{{ route('recipe.save') }}">
-                            @csrf
-                            <input type="hidden" name="name" value="{{ $recipe['name'] }}">
-                            <input type="hidden" name="description" value="{{ $recipe['description'] }}">
-                            <input type="hidden" name="duration" value="{{ $recipe['duration'] }}">
-                            <input type="hidden" name="servings" value="{{ $recipe['servings'] }}">
-                            <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
-                            <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
-                            <input type="hidden" name="image" value="{{ $recipe['image'] }}">
-                            <input type="hidden" name="instructions" value="{{ is_array($recipe['instructions']) ? implode("\n", $recipe['instructions']) : $recipe['instructions'] }}">
-                            <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
-                            <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
-                            <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save</button>
-                        </form>
-                    @else
-                        @if ($isFavorited && isset($recipeId))
-                            <form method="POST" action="{{ route('recipe.unsave', $recipeId) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-sm bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">💔 Unsave</button>
-                            </form>
-                        @else
-                            <form method="POST" action="{{ route('recipe.save') }}">
-                                @csrf
-                                <input type="hidden" name="name" value="{{ $recipe['name'] }}">
-                                <input type="hidden" name="description" value="{{ $recipe['description'] }}">
-                                <input type="hidden" name="duration" value="{{ $recipe['duration'] }}">
-                                <input type="hidden" name="servings" value="{{ $recipe['servings'] }}">
-                                <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
-                                <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
-                                <input type="hidden" name="image" value="{{ $recipe['image'] }}">
-                                <input type="hidden" name="instructions" value="{{ $recipe['instructions'] }}">
-                                <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
-                                <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
-                                <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">🤍 Save</button>
-                            </form>
-                        @endif
-                    @endif
+@if ($isSession)
+    <form method="POST" action="{{ route('recipe.save') }}">
+        @csrf
+         {{-- 👇 Add this to detect session vs DB --}}
+    <input type="hidden" name="from" value="{{ $isSession ? 'session' : 'db' }}">
+    <input type="hidden" name="index" value="{{ request()->route('index') }}">
+
+    {{-- recipe data --}}
+     <input type="hidden" name="name" value="{{ $recipe['name'] }}">
+        <input type="hidden" name="description" value="{{ $recipe['description'] }}">
+        <input type="hidden" name="duration" value="{{ $recipe['duration'] }}">
+        <input type="hidden" name="servings" value="{{ $recipe['servings'] }}">
+        <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
+        <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
+        <input type="hidden" name="image" value="{{ $recipe['image'] }}">
+        <input type="hidden" name="instructions" value="{{ is_array($recipe['instructions']) ? implode("\n", $recipe['instructions']) : $recipe['instructions'] }}">
+        <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
+        <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
+        <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save</button>
+    </form>
+@else
+    @if ($isFavorited && isset($recipeId))
+        <form method="POST" action="{{ route('recipe.unsave', $recipeId) }}">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="text-sm bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">💔 Unsave</button>
+        </form>
+    @else
+        <form method="POST" action="{{ route('recipe.save') }}">
+            @csrf
+            <input type="hidden" name="from" value="{{ request()->query('from') }}">
+            <input type="hidden" name="name" value="{{ $recipe['name'] }}">
+            <input type="hidden" name="description" value="{{ $recipe['description'] }}">
+            <input type="hidden" name="duration" value="{{ $recipe['duration'] }}">
+            <input type="hidden" name="servings" value="{{ $recipe['servings'] }}">
+            <input type="hidden" name="difficulty" value="{{ $recipe['difficulty'] }}">
+            <input type="hidden" name="calories" value="{{ $recipe['calories'] }}">
+            <input type="hidden" name="image" value="{{ $recipe['image'] }}">
+            <input type="hidden" name="instructions" value="{{ $recipe['instructions'] }}">
+            <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
+            <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
+            <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">🤍 Save</button>
+        </form>
+    @endif
+@endif
 
                     <!-- Add to Plan Button -->
                     @if ($isPlanned ?? false)
@@ -130,9 +147,12 @@
     <div id="printableGroceryList" class="hidden print:block p-6 max-w-md mx-auto bg-white">
         <h2 class="text-xl font-bold mb-4">🛒 Grocery Shopping List</h2>
         <ul class="list-disc pl-6 text-gray-800 space-y-1">
-            @foreach ($recipe['groceryLists'] as $item)
-                <li>{{ ucfirst($item) }}</li>
-            @endforeach
+           <ul class="list-disc pl-6 text-gray-800 space-y-1">
+    @foreach (is_array($recipe['groceryLists']) ? $recipe['groceryLists'] : json_decode($recipe['groceryLists'], true) as $item)
+        <li>{{ ucfirst($item) }}</li>
+    @endforeach
+</ul>
+
         </ul>
         <p class="mt-6 text-sm text-gray-500">Generated by CookEase - {{ now()->toDateString() }}</p>
     </div>
@@ -165,7 +185,7 @@
                         <option value="breakfast">Breakfast</option>
                         <option value="lunch">Lunch</option>
                         <option value="dinner">Dinner</option>
-                        <option value="others">Snacks</option>
+                        <option value="snack">Snacks</option>
                     </select>
                 </div>
 
@@ -206,6 +226,71 @@
         </div>
     </div>
 
+     <!-- ⭐ Review Section -->
+@if (!$isSession)
+<div class="max-w-4xl mx-auto mt-10">
+    <div class="bg-white shadow rounded-xl p-6">
+        <h3 class="text-lg font-semibold mb-4">⭐ User Reviews</h3>
+
+        <!-- Leave a Review -->
+        @auth
+            @if (!$isReviewed)
+                <form action="{{ route('review.store') }}" method="POST" class="mb-6">
+                    @csrf
+                    <input type="hidden" name="recipe_id" value="{{ $recipeId ?? $recipe['id'] ?? null }}">
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Your Rating</label>
+                        <select name="rating" class="w-full border rounded px-3 py-2" required>
+                            <option value="">-- Select Rating --</option>
+                            @for ($i = 5; $i >= 1; $i--)
+                                <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Your Comment</label>
+                        <textarea name="comment" class="w-full border rounded px-3 py-2" rows="3" required></textarea>
+                    </div>
+
+                    <div class="text-right">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Review</button>
+                    </div>
+                </form>
+            @else
+                <p class="text-gray-600 mb-6">✅ You've already submitted a review for this recipe.</p>
+            @endif
+        @else
+            <p class="text-gray-600 mb-6">Please <a href="{{ route('login') }}" class="text-blue-500 hover:underline">login</a> to leave a review.</p>
+        @endauth
+
+        <!-- Display Reviews -->
+        @forelse ($reviews as $review)
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="text-sm font-semibold text-gray-800">{{ $review->user->name }}</div>
+                    <div class="text-yellow-500 text-sm">
+                        @for ($i = 0; $i < $review->rating; $i++)
+                            ⭐
+                        @endfor
+                    </div>
+                </div>
+                <p class="text-gray-700">{{ $review->comment }}</p>
+                <p class="text-gray-400 text-xs mt-1">Posted on {{ $review->created_at->format('F j, Y') }}</p>
+            </div>
+        @empty
+            <p class="text-gray-600">No reviews yet. Be the first to leave one!</p>
+        @endforelse
+    </div>
+</div>
+@else
+    <div class="max-w-4xl mx-auto mt-10 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-xl p-6">
+        <p class="text-sm">✨ This is a newly generated recipe. Please save it first to unlock review features.</p>
+    </div>
+@endif
+
+
     <!-- Scripts -->
     <script>
         const groceryItems = @json($recipe['groceryLists']);
@@ -232,59 +317,7 @@
         }
     </script>
 
-    <!-- ⭐ Review Section -->
-<div class="max-w-4xl mx-auto mt-10">
-    <div class="bg-white shadow rounded-xl p-6">
-        <h3 class="text-lg font-semibold mb-4">⭐ User Reviews</h3>
-
-        <!-- Leave a Review -->
-        @auth
-            <form action="{{ route('review.store') }}" method="POST" class="mb-6">
-                @csrf
-                <input type="hidden" name="recipe_id" value="{{ $recipeId ?? $recipe['id'] ?? null }}">
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Your Rating</label>
-                    <select name="rating" class="w-full border rounded px-3 py-2" required>
-                        <option value="">-- Select Rating --</option>
-                        @for ($i = 5; $i >= 1; $i--)
-                            <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
-                        @endfor
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Your Comment</label>
-                    <textarea name="comment" class="w-full border rounded px-3 py-2" rows="3" required></textarea>
-                </div>
-
-                <div class="text-right">
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Review</button>
-                </div>
-            </form>
-        @else
-            <p class="text-gray-600 mb-6">Please <a href="{{ route('login') }}" class="text-blue-500 hover:underline">login</a> to leave a review.</p>
-        @endauth
-
-        <!-- Display Reviews -->
-        @forelse ($reviews as $review)
-            <div class="border-t border-gray-200 pt-4 mt-4">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="text-sm font-semibold text-gray-800">{{ $review->user->name }}</div>
-                    <div class="text-yellow-500 text-sm">
-                        @for ($i = 0; $i < $review->rating; $i++)
-                            ⭐
-                        @endfor
-                    </div>
-                </div>
-                <p class="text-gray-700">{{ $review->comment }}</p>
-                <p class="text-gray-400 text-xs mt-1">Posted on {{ $review->created_at->format('F j, Y') }}</p>
-            </div>
-        @empty
-            <p class="text-gray-600">No reviews yet. Be the first to leave one!</p>
-        @endforelse
-    </div>
-</div>
+   
 
 
 </x-app-layout>

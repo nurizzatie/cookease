@@ -12,7 +12,7 @@ use App\Http\Controllers\GenerateController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MealPlanController;
-use App\Http\Controllers\NotificationController; // Add this for notifications
+use App\Http\Controllers\NotificationController;
 use App\Models\Favorite;
 use App\Models\Review;
 use App\Models\Recipe;
@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
         $user = Auth::user();
         $isFavorited = false;
         $isPlanned = false;
+        $isReviewed = false;
         $recipeId = null;
         $reviews = [];
 
@@ -62,6 +63,16 @@ Route::middleware(['auth'])->group(function () {
                 abort(404);
             }
             $recipe = $recipes[$index];
+
+            // Ensure ingredients and groceryLists are arrays
+            $recipe['ingredients'] = is_array($recipe['ingredients'])
+                ? $recipe['ingredients']
+                : json_decode($recipe['ingredients'], true) ?? [];
+
+            $recipe['groceryLists'] = is_array($recipe['groceryLists'])
+                ? $recipe['groceryLists']
+                : json_decode($recipe['groceryLists'], true) ?? [];
+
 
             $existing = Recipe::where('name', $recipe['name'])
                 ->where('description', $recipe['description'])
@@ -79,6 +90,9 @@ Route::middleware(['auth'])->group(function () {
                     ->exists();
 
                 $reviews = Review::where('recipe_id', $recipeId)->latest()->get();
+                $isReviewed = Review::where('recipe_id', $recipeId)
+                    ->where('user_id', $user->id)
+                    ->exists();
             }
 
             return view('recipe-detail', [
@@ -87,23 +101,36 @@ Route::middleware(['auth'])->group(function () {
                 'isFavorited' => $isFavorited,
                 'isPlanned' => $isPlanned,
                 'recipeId' => $recipeId,
-                'reviews' => $reviews
+                'reviews' => $reviews,
+                'isReviewed' => $isReviewed,
             ]);
         }
 
         $recipe = Recipe::findOrFail($index);
 
+        $ingredients = $recipe->ingredients;
+        $groceryLists = $recipe->grocery_lists;
+
+        // Defensive decoding
+        $decodedIngredients = is_array($ingredients)
+            ? $ingredients
+            : (json_decode($ingredients, true) ?? []);
+
+        $decodedGroceryLists = is_array($groceryLists)
+            ? $groceryLists
+            : (json_decode($groceryLists, true) ?? []);
+
         $recipeArray = [
-            'name'         => $recipe->name,
-            'description'  => $recipe->description,
-            'duration'     => $recipe->duration,
-            'servings'     => $recipe->servings,
-            'difficulty'   => $recipe->difficulty,
-            'calories'     => $recipe->calories,
-            'image'        => $recipe->image,
-            'ingredients'  => is_array($recipe->ingredients) ? $recipe->ingredients : json_decode($recipe->ingredients, true),
+            'name' => $recipe->name,
+            'description' => $recipe->description,
+            'duration' => $recipe->duration,
+            'servings' => $recipe->servings,
+            'difficulty' => $recipe->difficulty,
+            'calories' => $recipe->calories,
+            'image' => $recipe->image,
+            'ingredients' => $decodedIngredients,
             'instructions' => $recipe->instructions,
-            'groceryLists' => is_array($recipe->grocery_lists) ? $recipe->grocery_lists : json_decode($recipe->grocery_lists, true),
+            'groceryLists' => $decodedGroceryLists,
         ];
 
         if ($user) {
@@ -113,6 +140,10 @@ Route::middleware(['auth'])->group(function () {
 
             $isPlanned = MealPlan::where('user_id', $user->id)
                 ->where('recipe_id', $recipe->id)
+                ->exists();
+
+            $isReviewed = Review::where('recipe_id', $recipe->id)
+                ->where('user_id', $user->id)
                 ->exists();
         }
 
@@ -125,8 +156,11 @@ Route::middleware(['auth'])->group(function () {
             'recipeId' => $recipe->id,
             'isPlanned' => $isPlanned,
             'reviews' => $reviews,
+            'isReviewed' => $isReviewed,
         ]);
     })->name('recipe.detail');
+
+
 
     // Save/Unsave recipe
     Route::post('/save-recipe', [RecipeController::class, 'saveRecipe'])->name('recipe.save');
@@ -147,14 +181,14 @@ Route::middleware(['auth'])->group(function () {
     // Notifications mark as read route
 
     Route::patch('/notifications/{notificationId}/mark', [MealPlanController::class, 'markNotificationAsRead'])
-    ->middleware('auth')
-    ->name('notifications.mark');  // 👈 THIS is the name Laravel is looking for
+        ->middleware('auth')
+        ->name('notifications.mark');  // 👈 THIS is the name Laravel is looking for
 
 
 });
 
 // 🌐 Landing and OAuth
-Route::get('/', fn () => redirect()->route('login'));
+Route::get('/', fn() => redirect()->route('login'));
 
 Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
@@ -162,11 +196,14 @@ Route::get('auth/facebook', [SocialAuthController::class, 'redirectToFacebook'])
 Route::get('auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback']);
 
 // 📊 Dashboard
-Route::get('/dashboard', fn () => view('dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', fn() => view('dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
 
 // 🔍 Dev-only testing view (optional)
-Route::get('/test-filters', fn () => view('test-filters'));
+Route::get('/test-filters', fn() => view('test-filters'));
+
+Route::get('/send-meal-notifications', [NotificationController::class, 'sendTodayMealPlanNotifications']);
+
 
 // Require auth routes generated by Breeze or your auth scaffolding
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
