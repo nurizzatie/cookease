@@ -30,7 +30,7 @@
             </div>
 
             @php
-                $categories = ['breakfast' => '🍳 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner', 'others' => '🍪 Snacks'];
+                $categories = ['breakfast' => '🍳 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner', 'snack' => '🍪 Snacks'];
             @endphp
 
             @foreach ($categories as $key => $label)
@@ -122,7 +122,7 @@
                                                 <option value="lunch" {{ $meal->meal_type === 'lunch' ? 'selected' : '' }}>Lunch</option>
                                                 <option value="dinner" {{ $meal->meal_type === 'dinner' ? 'selected' : '' }}>Dinner
                                                 </option>
-                                                <option value="others" {{ $meal->meal_type === 'others' ? 'selected' : '' }}>Snack
+                                                <option value="snack" {{ $meal->meal_type === 'snack' ? 'selected' : '' }}>Snack
                                                 </option>
                                             </select>
                                         </div>

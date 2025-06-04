@@ -39,7 +39,7 @@ class MealPlanController extends Controller
     public function storeMeal(Request $request)
     {
         $request->validate([
-            'meal_type' => 'required|in:breakfast,lunch,dinner,others',
+            'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
             'date' => 'required|date',
         ]);
 
@@ -201,7 +201,7 @@ class MealPlanController extends Controller
     {
         $validated = $request->validate([
             'date' => 'required|date',
-            'meal_type' => 'required|string',
+            'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
         ]);
 
         $meal = MealPlan::findOrFail($id);
