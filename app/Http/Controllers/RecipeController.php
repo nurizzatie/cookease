@@ -37,39 +37,48 @@ class RecipeController extends Controller
         return view('browse-recipes', compact('recipes'));
     }
 
-    public function saveRecipe(Request $request)
-    {
-        $data = $request->all();
+   public function saveRecipe(Request $request)
+{
+    $data = $request->all();
 
-        // Save or find recipe (avoid duplicates by name + description as example)
-        $recipe = Recipe::firstOrCreate(
-            ['name' => $data['name'], 'description' => $data['description']],
-            [
-                'duration'       => $data['duration'] ?? null,
-                'servings'       => $data['servings'] ?? null,
-                'difficulty'     => $data['difficulty'] ?? 'easy',
-                'calories'       => $data['calories'] ?? null,
-                'image'          => $data['image'] ?? null,
-                'ingredients'    => json_encode($data['ingredients']),
-                'instructions'   => $data['instructions'],
-                'grocery_lists' => isset($data['groceryLists']) 
-    ? json_encode($data['groceryLists']) 
-    : json_encode($data['ingredients']), // fallback from ingredients
+    // Prevent double-encoding if frontend already encoded it
+    $ingredients = is_string($data['ingredients']) ? json_decode($data['ingredients'], true) : $data['ingredients'];
+    $groceryLists = is_string($data['groceryLists']) ? json_decode($data['groceryLists'], true) : $data['groceryLists'];
 
-            ]
-        );
+    // Create or find existing recipe
+    $recipe = Recipe::firstOrCreate(
+        ['name' => $data['name'], 'description' => $data['description']],
+        [
+            'duration' => $data['duration'] ?? null,
+            'servings' => $data['servings'] ?? null,
+            'difficulty' => $data['difficulty'] ?? 'easy',
+            'calories' => $data['calories'] ?? null,
+            'image' => $data['image'] ?? null,
+            'instructions' => $data['instructions'] ?? '',
+            'ingredients' => json_encode($ingredients),
+            'grocery_lists' => json_encode($groceryLists),
+        ]
+    );
 
-        // Save to favorites
-        Favorite::firstOrCreate([
-            'user_id'   => Auth::id(),
-            'recipe_id' => $recipe->id,
-        ]);
+    // Save to favorites
+    Favorite::firstOrCreate([
+        'user_id' => Auth::id(),
+        'recipe_id' => $recipe->id,
+    ]);
 
-        return redirect()->route('recipe.detail', [
-            'index' => $recipe->id,
-            'from' => 'db'
-        ])->with('message', 'Recipe saved to favorites!');
-    }
+    // Redirect with proper `from` flag
+    $from = $data['from'] ?? 'db';
+    $index = $data['index'] ?? $recipe->id;
+
+    return redirect()->route('recipe.detail', [
+        'index' => $recipe->id, // always switch to DB version
+        'from' => 'db'
+    ])->with('message', 'Recipe saved to favorites!');
+
+}
+
+
+
 
     public function unsaveRecipe($id)
     {

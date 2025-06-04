@@ -211,6 +211,14 @@ class MealPlanController extends Controller
                          ->with('message', 'Meal updated successfully!');
     }
 
+    public function destroy(MealPlan $mealPlan)
+{
+    $mealPlan->delete();
+
+    return back()->with('message', 'Meal removed successfully.');
+}
+
+
     public function markNotificationAsRead($notificationId)
     {
         $user = auth()->user();

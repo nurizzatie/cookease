@@ -23,7 +23,7 @@
                         {{ __('Browse Recipes') }}
                     </x-nav-link>
                     <x-nav-link :href="route('recipes.saved')" :active="request()->routeIs('recipes.saved')">
-                        {{ __('Favorite Recipes') }}
+                        {{ __('Saved Recipes') }}
                     </x-nav-link>
                     <x-nav-link :href="route('meal-plan.index')" :active="request()->routeIs('meal-plan.index')">
                         {{ __('Meal Plans') }}
@@ -35,32 +35,56 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
                 @auth
                 <!-- Notifications Dropdown -->
-                <div class="relative" x-data="{ openNotif: false }">
-                    <button @click="openNotif = !openNotif" class="relative inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                        🔔
-                        <span class="ml-1">{{ auth()->user()->unreadNotifications->count() }}</span>
-                    </button>
+<div class="relative mr-2" x-data="{ openNotif: false }">
+    <button @click="openNotif = !openNotif"
+        class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-white rounded-full hover:bg-gray-100 focus:outline-none transition duration-150">
+        <span>🔔</span>
 
-                    <div x-show="openNotif" @click.away="openNotif = false" 
-                         class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 overflow-auto max-h-60 border border-gray-200 dark:border-gray-700">
-                        <ul>
-                            @forelse (auth()->user()->unreadNotifications as $notification)
-                                <li class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                                    <div class="flex justify-between items-center">
-                                        <div>{{ $notification->data['message'] }}</div>
-                                        <form method="POST" action="{{ route('notifications.mark', $notification->id) }}">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="text-blue-500 hover:underline text-xs ml-2">Mark as read</button>
-                                        </form>
-                                    </div>
-                                </li>
-                            @empty
-                                <li class="px-4 py-2 text-gray-500 dark:text-gray-400">No new notifications.</li>
-                            @endforelse
-                        </ul>
-                    </div>
-                </div>
+        @php $count = auth()->user()->unreadNotifications->count(); @endphp
+        @if ($count > 0)
+            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                {{ $count }}
+            </span>
+        @endif
+    </button>
+
+    <div x-show="openNotif" @click.away="openNotif = false"
+        x-transition
+        class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50 max-h-80 overflow-y-auto">
+        <div class="px-4 py-3 border-b font-semibold text-gray-700 bg-gray-50">
+            Notifications
+        </div>
+        <ul class="divide-y divide-gray-200">
+           @forelse (auth()->user()->unreadNotifications as $notification)
+    <li class="px-4 py-3 hover:bg-gray-50 transition">
+        <div class="flex justify-between items-start">
+            {{-- Make message clickable --}}
+            <a href="{{ $notification->data['route'] }}"
+               class="text-sm text-gray-900 leading-snug">
+               {!! $notification->data['message'] !!}
+            </a>
+
+            {{-- Mark as read --}}
+            <form method="POST" action="{{ route('notifications.mark', $notification->id) }}">
+                @csrf
+                @method('PATCH')
+                <button type="submit"
+                    class="text-xs text-blue-600 hover:underline ml-2 mt-0.5">
+                    Mark
+                </button>
+            </form>
+        </div>
+    </li>
+@empty
+    <li class="px-4 py-4 text-sm text-gray-500 text-center">
+        No new notifications ✨
+    </li>
+@endforelse
+
+        </ul>
+    </div>
+</div>
+
                 @endauth
 
                 <!-- Settings Dropdown -->
