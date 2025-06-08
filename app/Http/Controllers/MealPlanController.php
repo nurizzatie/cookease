@@ -13,28 +13,43 @@ use Illuminate\Support\Facades\Notification;
 class MealPlanController extends Controller
 {
     // Show meal plan for selected day
-    public function index(Request $request)
-    {
-        $userId = Auth::id();
-        $date = $request->input('date', Carbon::today()->toDateString());
+   public function index(Request $request)
+{
+    $userId = Auth::id();
 
-        $availableDates = MealPlan::where('user_id', $userId)
-            ->orderBy('date')
-            ->pluck('date')
-            ->unique()
-            ->toArray();
+    // Only show meal plans from today onwards
+    $availableDates = MealPlan::where('user_id', $userId)
+        ->whereDate('date', '>=', Carbon::today())
+        ->orderBy('date')
+        ->pluck('date')
+        ->unique()
+        ->toArray();
 
-        $plans = MealPlan::with('recipe')
-            ->where('user_id', $userId)
-            ->whereDate('date', $date)
-            ->orderBy('meal_type')
-            ->get()
-            ->groupBy('meal_type');
+    // Get selected date from query, else fallback smartly
+    $selectedDate = $request->input('date');
 
-        $recipes = Recipe::all();
-
-        return view('meal_plan.index', compact('plans', 'recipes', 'date', 'availableDates'));
+    if (!$selectedDate || !in_array($selectedDate, $availableDates)) {
+        $selectedDate = $availableDates[0] ?? Carbon::today()->toDateString(); // fallback to today if no plans
     }
+
+    // Load meal plans for the selected date
+    $plans = MealPlan::with('recipe')
+        ->where('user_id', $userId)
+        ->whereDate('date', $selectedDate)
+        ->orderBy('meal_type')
+        ->get()
+        ->groupBy('meal_type');
+
+    $recipes = Recipe::all();
+
+    return view('meal_plan.index', [
+        'plans' => $plans,
+        'recipes' => $recipes,
+        'date' => $selectedDate,
+        'availableDates' => $availableDates,
+    ]);
+}
+
 
     public function storeMeal(Request $request)
     {
@@ -48,22 +63,22 @@ class MealPlanController extends Controller
         $recipe = Recipe::firstOrCreate(
             ['name' => $data['name'], 'description' => $data['description']],
             [
-                'duration'       => $data['duration'] ?? null,
-                'servings'       => $data['servings'] ?? null,
-                'difficulty'     => $data['difficulty'] ?? 'easy',
-                'calories'       => $data['calories'] ?? null,
-                'image'          => $data['image'] ?? null,
-                'ingredients'    => json_encode($data['ingredients']),
-                'instructions'   => $data['instructions'],
-                'grocery_lists'  => json_encode($data['groceryLists']),
+                'duration' => $data['duration'] ?? null,
+                'servings' => $data['servings'] ?? null,
+                'difficulty' => $data['difficulty'] ?? 'easy',
+                'calories' => $data['calories'] ?? null,
+                'image' => $data['image'] ?? null,
+                'ingredients' => json_encode($data['ingredients']),
+                'instructions' => $data['instructions'],
+                'grocery_lists' => json_encode($data['groceryLists']),
             ]
         );
 
         $mealPlan = MealPlan::create([
-            'user_id'   => Auth::id(),
+            'user_id' => Auth::id(),
             'recipe_id' => $recipe->id,
             'meal_type' => $data['meal_type'],
-            'date'      => $data['date'],
+            'date' => $data['date'],
         ]);
 
         // Only send notification if the meal plan date is today
@@ -208,15 +223,15 @@ class MealPlanController extends Controller
         $meal->update($validated);
 
         return redirect()->route('meal-plan.index', ['date' => $validated['date']])
-                         ->with('message', 'Meal updated successfully!');
+            ->with('message', 'Meal updated successfully!');
     }
 
     public function destroy(MealPlan $mealPlan)
-{
-    $mealPlan->delete();
+    {
+        $mealPlan->delete();
 
-    return back()->with('message', 'Meal removed successfully.');
-}
+        return back()->with('message', 'Meal removed successfully.');
+    }
 
 
     public function markNotificationAsRead($notificationId)

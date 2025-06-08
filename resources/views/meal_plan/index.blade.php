@@ -8,26 +8,36 @@
 
     <div class="text-center max-w-4xl mx-auto py-8 px-4">
 
-        <div class="flex justify-start mb-6 border-b pb-4">
-            <form method="GET" action="{{ route('meal-plan.index') }}" class="mb-6">
-                <label for="date" class="block text-sm font-medium text-gray-700 mr-2 text-left">📅 Date:</label>
+        <div class="flex items-center gap-3 max-w-md w-full">
+    <label for="date" class="text-sm font-medium text-gray-700 whitespace-nowrap flex items-center">
+        📅 Select Date
+    </label>
 
-                <select name="date" id="date" onchange="this.form.submit()"
-                    class="border-gray-300 px-3 py-1 text-sm shadow-sm w-full">
-                    @foreach ($availableDates as $availableDate)
-                        <option value="{{ $availableDate }}" {{ $date == $availableDate ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::parse($availableDate)->format('l, d M Y') }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
+    <div class="relative w-[200px]">
+        <select name="date" id="date" onchange="this.form.submit()"
+            class="appearance-none w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm shadow-sm focus:ring-2 focus:ring-red-300 focus:border-red-300">
+            @foreach ($availableDates as $availableDate)
+                <option value="{{ $availableDate }}" {{ $date == $availableDate ? 'selected' : '' }}>
+                    {{ \Carbon\Carbon::parse($availableDate)->format('l, d M Y') }}
+                </option>
+            @endforeach
+        </select>
+
+        <!-- Dropdown Arrow Icon -->
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M19 9l-7 7-7-7" />
+            </svg>
         </div>
+    </div>
+</div>
+
 
         @if ($plans->isNotEmpty())
 
-            <div class="text-center mb-6 text-gray-700 text-lg">
-                🍽 Your menu for <strong>{{ \Carbon\Carbon::parse($date)->format('l, d M Y') }}</strong>
-            </div>
+        
 
             @php
                 $categories = ['breakfast' => '🍳 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner', 'snack' => '🍪 Snacks'];
