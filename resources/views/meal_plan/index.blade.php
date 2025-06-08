@@ -8,7 +8,8 @@
 
     <div class="text-center max-w-4xl mx-auto py-8 px-4">
 
-        <div class="flex items-center gap-3 max-w-md w-full">
+    <form method="GET" action="{{ route('meal-plan.index') }}">
+    <div class="flex items-center gap-3 max-w-md w-full">
     <label for="date" class="text-sm font-medium text-gray-700 whitespace-nowrap flex items-center">
         📅 Select Date
     </label>
@@ -33,6 +34,7 @@
         </div>
     </div>
 </div>
+</form>
 
 
         @if ($plans->isNotEmpty())
