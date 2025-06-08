@@ -71,7 +71,8 @@ class HealthGoalController extends Controller
             CalorieCalculator::updateCalorieTarget($bmi, $healthGoal->goal);
         }
 
-        return redirect()->back()->with('status', 'health-goal-updated');
+        return redirect()->route('profile.edit')->with('status', 'health-goal-updated');
+
     }
 }
 
