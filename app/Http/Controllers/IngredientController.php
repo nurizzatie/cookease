@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class IngredientController extends Controller
 {
@@ -113,15 +115,6 @@ class IngredientController extends Controller
         $bmiValue = $bmiRecord ? $bmiRecord->getBmiAttribute() : null;
         $bmiCategory = $bmiRecord ? $bmiRecord->getBmiCategory() : null;;
 
-        // if ($bmiValue) {
-        //     if ($bmiValue < 18.5)
-        //         $bmiCategory = 'underweight';
-        //     elseif ($bmiValue >= 25)
-        //         $bmiCategory = 'overweight';
-        //     elseif ($bmiValue >= 30)
-        //         $bmiCategory = 'obese';
-        // }
-
         $filterText = implode(', ', $filters);
 
         $extraInfo = '';
@@ -201,14 +194,6 @@ PROMPT;
 
             return redirect()->route('generate.result');
 
-
-            // return view('generate-results', [
-            //     'ingredients' => $ingredients,
-            //     'recipes' => $recipes,
-            //     'recentIngredients' => $recentIngredients,
-            //     'frequentIngredients' => $frequentIngredients
-            // ]);
-
         } catch (\Exception $e) {
             Log::error('Groq API exception: ' . $e->getMessage());
             return back()->with('message', 'An error occurred while contacting the AI service.');
@@ -234,7 +219,6 @@ PROMPT;
         ]);
     }
 
-
     protected function getImageFromPixabay($query)
     {
         $response = Http::get('https://pixabay.com/api/', [
@@ -250,7 +234,7 @@ PROMPT;
             return $response['hits'][0]['webformatURL'];
         }
 
-        return 'https://via.placeholder.com/300x200'; // fallback image
+        return asset('images/placeholder.jpg');
     }
 
     public function getGroupedIngredients()

@@ -110,7 +110,7 @@
                         @foreach ($recentFavorites as $recipe)
                             <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300">
                                 <a href="{{ route('recipe.detail', $recipe->id) }}">
-                                    <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-full h-48 object-cover">
+                                    <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-48 object-cover">
                                     <div class="p-4">
                                         <h3 class="font-semibold text-lg text-gray-800">{{ $recipe->name }}</h3>
                                         <p class="text-gray-500 text-sm mt-1">{{ Str::limit($recipe->description, 100) }}</p>
@@ -136,7 +136,7 @@
                 @foreach ($recommendedRecipes as $recipe)
                     <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300">
                         <a href="{{ route('recipe.detail', $recipe->id) }}">
-                            <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-full h-48 object-cover">
+                            <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-48 object-cover">
                             <div class="p-4">
                                 <h3 class="font-semibold text-lg text-gray-800">{{ $recipe->name }}</h3>
                                 <p class="text-gray-500 text-sm mt-1">{{ Str::limit($recipe->description, 100) }}</p>

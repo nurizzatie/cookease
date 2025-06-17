@@ -88,7 +88,7 @@
                                 <!-- Card Content -->
                                 <a href="{{ route('recipe.detail', $recipe->id) }}">
                                     <div class="relative h-48 w-full overflow-hidden">
-                                        <img src="{{ $recipe->image }}" alt="recipe image" class="w-full h-full object-cover">
+                                        <img src="{{ $recipe->image }}" alt="recipe image" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-full object-cover">
                                         <div class="absolute inset-0 bg-black bg-opacity-20 hover:bg-opacity-5 transition duration-300">
                                         </div>
                                     </div>

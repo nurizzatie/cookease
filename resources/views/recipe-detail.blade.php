@@ -21,7 +21,10 @@
 
     <div class="py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div class="bg-white shadow rounded-xl p-6">
-            <img src="{{ $recipe['image'] }}" alt="recipe image" class="w-full h-64 object-cover rounded mb-6">
+            <img src="{{ $recipe['image'] }}"
+            onerror="this.onerror=null; this.src='/images/placeholder.jpg';"
+            alt="recipe image"
+            class="w-full h-64 object-cover rounded mb-6">
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-8">
                 <p><strong>⏱ Duration:</strong> {{ $recipe['duration'] }}</p>
@@ -97,7 +100,7 @@
         <input type="hidden" name="instructions" value="{{ is_array($recipe['instructions']) ? implode("\n", $recipe['instructions']) : $recipe['instructions'] }}">
         <input type="hidden" name="ingredients" value="{{ json_encode($recipe['ingredients']) }}">
         <input type="hidden" name="groceryLists" value="{{ json_encode($recipe['groceryLists']) }}">
-        <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save</button>
+        <button type="submit" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">🤍 Save</button>
     </form>
 @else
     @if ($isFavorited && isset($recipeId))

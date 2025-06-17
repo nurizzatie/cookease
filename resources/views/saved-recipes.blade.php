@@ -13,7 +13,7 @@
                 @foreach ($favorites as $favorite)
                 <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300 flex flex-col h-full">
                     <a href="{{ route('recipe.detail', $favorite->recipe->id) }}" class="flex flex-col h-full">
-                        <img src="{{ $favorite->recipe->image }}" alt="{{ $favorite->recipe->name }}" class="w-full h-48 object-cover">
+                        <img src="{{ $favorite->recipe->image }}" alt="{{ $favorite->recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-48 object-cover">
                         
                         <!-- Card content grows to fill remaining space -->
                         <div class="p-4 flex flex-col flex-grow">

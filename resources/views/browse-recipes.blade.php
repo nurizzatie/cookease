@@ -38,7 +38,7 @@
                 <!-- Make the outer card a flex container with full height -->
                 <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300 flex flex-col h-full">
                     <a href="{{ route('recipe.detail', $recipe->id) }}" class="flex flex-col h-full">
-                        <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-full h-48 object-cover">
+                        <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-48 object-cover">
                         
                         <!-- Card content grows to fill remaining space -->
                         <div class="p-4 flex flex-col flex-grow">

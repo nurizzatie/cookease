@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MealPlan;
-use App\Models\Recipe;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Models\Recipe;
+use App\Models\MealPlan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use App\Notifications\DailyMealPlanReminder;
 use Illuminate\Support\Facades\Notification;
 
@@ -59,23 +62,44 @@ class MealPlanController extends Controller
         ]);
 
         $data = $request->all();
+        $imageUrl = $data['image'];
+        $localImagePath = null;
+
+        try {
+            if ($imageUrl && filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                // Generate a hash-based filename (consistent but unique to URL)
+                $hashedName = md5($imageUrl);
+                $filename = "recipes/{$hashedName}.jpg";
+
+                // Only download if it doesn't exist
+                if (!Storage::disk('public')->exists($filename)) {
+                    $imageContent = Http::get($imageUrl)->body();
+                    Storage::disk('public')->put($filename, $imageContent);
+                }
+
+                $localImagePath = Storage::url($filename); // /storage/recipes/xxxx.jpg
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to download recipe image: ' . $e->getMessage());
+            $localImagePath = 'https://via.placeholder.com/300x200';
+        }
 
         $recipe = Recipe::firstOrCreate(
             ['name' => $data['name'], 'description' => $data['description']],
             [
-                'duration' => $data['duration'] ?? null,
-                'servings' => $data['servings'] ?? null,
-                'difficulty' => $data['difficulty'] ?? 'easy',
-                'calories' => $data['calories'] ?? null,
-                'image' => $data['image'] ?? null,
-                'ingredients' => json_encode($data['ingredients']),
-                'instructions' => $data['instructions'],
-                'grocery_lists' => json_encode($data['groceryLists']),
+                'duration'       => $data['duration'] ?? null,
+                'servings'       => $data['servings'] ?? null,
+                'difficulty'     => $data['difficulty'] ?? 'easy',
+                'calories'       => $data['calories'] ?? null,
+                'image' => $localImagePath,
+                'ingredients'    => json_encode($data['ingredients']),
+                'instructions'   => $data['instructions'],
+                'grocery_lists'  => json_encode($data['groceryLists']),
             ]
         );
 
-        $mealPlan = MealPlan::create([
-            'user_id' => Auth::id(),
+        MealPlan::create([
+            'user_id'   => Auth::id(),
             'recipe_id' => $recipe->id,
             'meal_type' => $data['meal_type'],
             'date' => $data['date'],
