@@ -17,10 +17,11 @@
         <!-- Left side: Login Form -->
         <div class="w-full md:w-1/2 p-6 md:p-14">
             <!-- Logo -->
-            <div class="mb-6 flex items-center space-x-2">
+            <div class="mb-6 flex items-center justify-center space-x-2 text-center">
                 <img src="{{ asset('images/logo.png') }}" alt="CookEase Logo" class="h-10 w-auto">
-                <span class="text-xl font-bold text-gray-800">CookEase</span>
+                <span class="text-xl font-semibold text-gray-800">CookEase</span>
             </div>
+
 
             <!-- Welcome Message -->
             <div class="text-center cursor-default">
@@ -62,23 +63,23 @@
                         </a>
                     @endif
 
-                    <button type="submit" class="bg-yellow-400 text-black text-sm font-semibold px-6 py-2 rounded hover:bg-yellow-500 transition">
+                    <button type="submit" class="bg-yellow-400 text-black text-sm font-semibold px-6 py-2 rounded hover:bg-yellow-500 transition w-full sm:w-auto">
                         Login
                     </button>
                 </div>
                 <div class="mt-4"></div>
 
-<!-- Social Login Buttons (Tighter Gap) -->
-<div class="text-center mt-8 space-y-3">
-    <a href="{{ url('auth/google') }}" class="flex items-center justify-center text-black text-sm font-medium px-6 py-2 gap-3">
-        <img src="{{ asset('images/google-icon.png') }}" alt="Google" class="w-5 h-5 object-contain">
-        <span>Login with Google</span>
-    </a>
-    <a href="{{ url('auth/facebook') }}" class="flex items-center justify-center text-black text-sm font-medium px-4 py-2 gap-2">
-        <img src="{{ asset('images/Facebook-Logo.png') }}" alt="Facebook" class="w-5 h-5 object-contain">
-        <span>Login with Facebook</span>
-    </a>
-</div>
+                <!-- Social Login Buttons (Tighter Gap) -->
+                <div class="text-center mt-8 space-y-3">
+                    <a href="{{ url('auth/google') }}" class="flex items-center justify-center text-black text-sm font-medium px-6 py-2 gap-3">
+                        <img src="{{ asset('images/google-icon.png') }}" alt="Google" class="w-5 h-5 object-contain">
+                        <span>Login with Google</span>
+                    </a>
+                    <a href="{{ url('auth/facebook') }}" class="flex items-center justify-center text-black text-sm font-medium px-4 py-2 gap-2">
+                        <img src="{{ asset('images/Facebook-Logo.png') }}" alt="Facebook" class="w-5 h-5 object-contain">
+                        <span>Login with Facebook</span>
+                    </a>
+                </div>
 
                 <!-- Register Link -->
                 <div class="text-center mt-6">
