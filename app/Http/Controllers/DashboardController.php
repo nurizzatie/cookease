@@ -53,16 +53,17 @@ class DashboardController extends Controller
         $recommendedRecipes = Recipe::latest()->take(4)->get();
 
         // AI Cooking Tips
-        $tips = $this->generateDailyCookingTips();
+        $apiError = false;
+        $tips = $this->generateDailyCookingTips($apiError);
 
         return view('dashboard', compact(
             'bmi', 'bmiCategory',
             'todayCalories', 'savedCount', 'generatedCount',
-            'todaysPlans', 'recentFavorites', 'recommendedRecipes', 'tips'
+            'todaysPlans', 'recentFavorites', 'recommendedRecipes', 'tips', 'apiError'
         ));
     }
 
-    protected function generateDailyCookingTips()
+    protected function generateDailyCookingTips(&$apiError = false)
     {
         $apiKey = config('services.groq.key');
 
@@ -79,10 +80,18 @@ class DashboardController extends Controller
 
             $json = $response->json();
             $content = $json['choices'][0]['message']['content'] ?? '[]';
+            $tips = json_decode($content, true);
 
-            return json_decode($content, true) ?? [];
+            if (!is_array($tips)) {
+                $apiError = true;
+                return [];
+            }
+
+            return $tips;
         } catch (\Exception $e) {
-            return ['Use fresh ingredients.', 'Taste as you cook.', 'Keep your knives sharp.'];
+            Log::error('AI Cooking Tips Error: ' . $e->getMessage());
+            $apiError = true;
+            return [];
         }
     }
 }

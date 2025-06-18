@@ -9,14 +9,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-4">
-                    <p class="text-black text-3xl text-yellow-600 font-bold">Hello, {{ Auth::user()->name }}!</p>
-                    <p class="text-gray-600 text-lg">Ready to cook something delicious?</p>
+                    <p class="text-black text-2xl sm:text-3xl text-yellow-600 font-bold">Hello, {{ Auth::user()->name }}!</p>
+                    <p class="text-gray-600 text-base sm:text-lg">Ready to cook something delicious?</p>
                 </div>
             </div>
         </div>
 
         <div class="max-w-screen-xl mx-auto p-5 sm:p-10 md:p-10">
-            <div class="grid grid-cols-1 gap-4 px-4 mb-10 sm:grid-cols-4 sm:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 sm:px-8 mb-10">
                 <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
                     <div class="p-4 text-white" style="background-color: #FAD59A"><i class="fa-solid fa-weight-scale fa-3x"></i></div>
                     <div class="px-4 text-gray-700">
@@ -54,10 +54,17 @@
                     <!-- Daily Cooking Tips -->
                     <div class="bg-lime-100 shadow rounded-2xl p-4 flex flex-col h-full">
                         <h2 class="text-lg sm:text-xl md:text-xl font-semibold mb-4">💡Daily Cooking Tips</h2>
-                        <ul class="space-y-2 list-disc list-inside text-sm text-gray-700 flex-1">
-                            @foreach ($tips as $tip)
+
+                        @if ($apiError)
+                            <div class="text-red-600 text-sm">⚠️ Failed to load tips from AI. Showing default tips.</div>
+                        @endif
+
+                        <ul class="space-y-2 list-disc list-inside text-sm text-gray-700 flex-1 mt-2">
+                            @forelse ($tips as $tip)
                                 <li>{{ $tip }}</li>
-                            @endforeach
+                            @empty
+                                <li>No tips available.</li>
+                            @endforelse
                         </ul>
                     </div>
 
@@ -67,37 +74,35 @@
                             <h2 class="text-lg sm:text-xl md:text-xl font-semibold">📆 Today's Meal Plan</h2>
                             <a href="{{ route('meal-plan.index') }}" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
                         </div>
+
                         <ul class="space-y-3 flex-1">
+                            @php
+                                $icons = [
+                                    'breakfast' => '🌞',
+                                    'lunch' => '🥗',
+                                    'dinner' => '🌙',
+                                    'snack' => '🍪',
+                                ];
+                            @endphp
 
-                         <ul class="space-y-3 flex-1">
-@php
-    $icons = [
-        'breakfast' => '🌞',
-        'lunch' => '🥗',
-        'dinner' => '🌙',
-        'snack' => '🍪',
-    ];
-@endphp
-
-@forelse ($todaysPlans as $plan)
-    @if ($plan->recipe)
-        <a href="{{ route('recipe.detail', $plan->recipe->id) }}" class="block">
-            <li class="p-4 bg-white border border-yellow-200 backdrop-blur-md rounded-xl shadow hover:scale-[1.01] hover:shadow-md transition-all duration-200 cursor-pointer">
-                <div class="flex items-center gap-3 text-gray-800">
-                    <span class="text-2xl">{{ $icons[$plan->meal_type] ?? '🍴' }}</span>
-                    <div class="text-sm sm:text-base">
-                        <span class="font-semibold capitalize">{{ $plan->meal_type }}:</span>
-                        <span>{{ $plan->recipe->name }}</span>
-                    </div>
-                </div>
-            </li>
-        </a>
-    @endif
-@empty
-    <li class="text-gray-400 italic">No meals planned for today. ✨</li>
-@endforelse
-</ul>
-
+                            @forelse ($todaysPlans as $plan)
+                                @if ($plan->recipe)
+                                    <a href="{{ route('recipe.detail', $plan->recipe->id) }}" class="block">
+                                        <li class="p-4 bg-white border border-yellow-200 backdrop-blur-md rounded-xl shadow hover:scale-[1.01] hover:shadow-md transition-all duration-200 cursor-pointer">
+                                            <div class="flex items-center gap-3 text-gray-800">
+                                                <span class="text-2xl">{{ $icons[$plan->meal_type] ?? '🍴' }}</span>
+                                                <div class="text-sm sm:text-base">
+                                                    <span class="font-semibold capitalize">{{ $plan->meal_type }}:</span>
+                                                    <span>{{ $plan->recipe->name }}</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </a>
+                                @endif
+                            @empty
+                                <li class="text-gray-400 italic">No meals planned for today. ✨</li>
+                            @endforelse
+                        </ul>
                     </div>
 
                     <!-- Recently Saved Recipes -->
@@ -110,7 +115,7 @@
                         @foreach ($recentFavorites as $recipe)
                             <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300">
                                 <a href="{{ route('recipe.detail', $recipe->id) }}">
-                                    <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-48 object-cover">
+                                    <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-40 sm:h-48 md:h-56 object-cover">
                                     <div class="p-4">
                                         <h3 class="font-semibold text-lg text-gray-800">{{ $recipe->name }}</h3>
                                         <p class="text-gray-500 text-sm mt-1">{{ Str::limit($recipe->description, 100) }}</p>
@@ -136,7 +141,7 @@
                 @foreach ($recommendedRecipes as $recipe)
                     <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300">
                         <a href="{{ route('recipe.detail', $recipe->id) }}">
-                            <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-48 object-cover">
+                            <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-40 sm:h-48 md:h-56 object-cover">
                             <div class="p-4">
                                 <h3 class="font-semibold text-lg text-gray-800">{{ $recipe->name }}</h3>
                                 <p class="text-gray-500 text-sm mt-1">{{ Str::limit($recipe->description, 100) }}</p>
@@ -153,6 +158,5 @@
                 
             </div>
         </div>
-
     </div>
 </x-app-layout>
