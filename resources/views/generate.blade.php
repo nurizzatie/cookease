@@ -9,8 +9,8 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4">
-                <h1 class="text-black text-6xl font-semibold font-['Inter'] mb-4">
+            <div class="p-2 sm:p-4">
+                <h1 class="text-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold font-['Inter'] mb-4">
                     Malaysian Ingredients, Infinite Recipes.
                 </h1>
 
@@ -20,7 +20,7 @@
                     </div>
                 @endif
 
-                <form class="w-full mb-6" method="POST" action="{{ route('generate.process') }}">
+                <form class="w-full mb-6" method="POST" action="{{ route('generate.process') }}" onsubmit="showLoading()">
                     @csrf
                     <div class="mb-4" x-data="{ showFilters: false }">
                         <label for="ingredients" class="block text-gray-700 font-medium mb-2">
@@ -86,7 +86,7 @@
                     </div>
                     <div class="w-full flex justify-end mt-4">
                         <button type="submit"
-                            class="block px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                            class="w-full sm:w-auto px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                             Generate Recipe
                         </button>
                     </div>
@@ -99,7 +99,7 @@
 
                 <div>
                     <h3 class="text-gray-700 font-medium">🕑 Recently Searched:</h3>
-                    <div class="flex flex-wrap gap-2 mt-2">
+                    <div class="flex flex-wrap gap-2 mt-2 text-sm">
                        @foreach(array_unique(array_slice($recentIngredients, 0, 6)) as $index => $item)
 
                             <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-blue-200 transition
@@ -124,7 +124,7 @@
                     </div>
                 </div>
 
-                <div class="mt-8 p-6 bg-yellow-100 rounded-lg shadow transition-transform hover:scale-105">
+                <div class="mt-8 p-4 sm:p-6 bg-yellow-100 rounded-lg shadow transition-transform hover:scale-105">
                     <div class="flex items-center mb-4">
                         <span class="text-2xl mr-2">🍲</span>
                         <h3 class="text-xl font-bold text-gray-800">Quick Tips</h3>
@@ -143,8 +143,8 @@
                 </div>
             </div>
 
-            <div class="p-4">
-                <div class="grid grid-cols-2 gap-4 grid-flow-dense">
+            <div class="p-4 overflow-x-hidden">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-4">
                     <img src="{{ asset('images/dish5.jpg') }}" class="col-span-2 rounded-xl shadow-md hover:scale-105 transition">
                     <img src="{{ asset('images/dish2.jpg') }}" class="rounded-xl shadow-md hover:scale-105 transition">
                     <img src="{{ asset('images/dish3.jpg') }}" class="rounded-xl shadow-md hover:scale-105 transition">
@@ -154,6 +154,22 @@
             </div>
         </div>
     </div>
+
+    <!-- Fullscreen Lottie Loading Spinner -->
+    <div id="loadingSpinner" class="fixed inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center z-50 hidden">
+        <dotlottie-player
+            src="https://lottie.host/d76843dc-6d98-4611-9f25-e96ddceee97e/907T7zvjXw.json"
+            background="transparent"
+            speed="1"
+            style="width: 300px; height: 300px;"
+            loop
+            autoplay>
+        </dotlottie-player>
+        <p class="mt-4 text-lg font-semibold text-gray-700 animate-pulse">
+            Generating recipes... Please wait!
+        </p>
+    </div>
+
 </x-app-layout>
 
 <!-- Tagify Assets -->
@@ -222,5 +238,9 @@
                 el.remove();
             }
         });
+    }
+
+    function showLoading() {
+        document.getElementById('loadingSpinner').classList.remove('hidden');
     }
 </script>

@@ -19,7 +19,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+        <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+        
         <style>
             @media print {
                 body * {
@@ -61,7 +62,9 @@
     <footer class="bg-white rounded-lg shadow-sm">
         <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
             <hr class="my-6 border-yellow-600 sm:mx-auto lg:my-8" />
-            <span class="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2025 <a href="{{ route('dashboard') }}" class="hover:underline">CookEase</a>. All Rights Reserved.</span>
+            <span class="block text-sm text-gray-500 text-center dark:text-gray-400">
+                © 2025 <a href="{{ route('dashboard') }}" class="hover:underline">CookEase</a>. All Rights Reserved.
+            </span>
         </div>
     </footer>
 </html>
