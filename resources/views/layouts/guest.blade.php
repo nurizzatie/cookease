@@ -21,12 +21,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-gray-900 antialiased">
-    <div class="min-h-screen flex items-center justify-center bg-cover bg-top"
+    <div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-cover bg-top"
          style="background-image: url('{{ $backgroundImage }}')">
 
-         <div class="max-w-sm md:max-w-2xl bg-white shadow-lg rounded-2xl flex flex-col 
-         md:flex-row {{ $imagePosition === 'right' ? 'md:flex-row-reverse' : '' }} overflow-hidden">
-     
+        <div class="w-full max-w-md sm:max-w-lg md:max-w-2xl bg-white shadow-lg rounded-2xl flex flex-col 
+            md:flex-row {{ $imagePosition === 'right' ? 'md:flex-row-reverse' : '' }} overflow-hidden">
 
             @if ($sideImage)    
                 <div class="hidden md:block md:w-2/5">
@@ -34,7 +33,7 @@
                 </div>
             @endif
 
-            <div class="w-full md:w-3/5 p-5 sm:p-14">
+            <div class="w-full md:w-3/5 p-6 sm:p-10">
                 {{ $slot }}
             </div>
 
