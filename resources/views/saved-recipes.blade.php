@@ -1,11 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Favorite Recipes') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('My Saved Recipes') }}</h2>
     </x-slot>
 
     <div class="py-12 max-w-7xl mx-auto px-6">
-        <h3 class="text-xl font-bold mb-6">Your Favorite Recipes</h3>
-
         @if ($favorites->isEmpty())
             <p class="text-gray-500">You haven't saved any recipes yet.</p>
         @else

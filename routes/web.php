@@ -19,10 +19,10 @@ use App\Models\Recipe;
 use App\Models\MealPlan;
 use Illuminate\Support\Facades\Auth;
 
-// 🔐 Authenticated user routes
+// Authenticated user routes
 Route::middleware(['auth'])->group(function () {
 
-    // 🧠 BMI
+    // BMI
     Route::get('/profile/bmi', [ProfileController::class, 'modify'])->name('profile.bmi.edit');
     Route::get('/bmi/form', [BMIController::class, 'showForm'])->name('bmi.form');
     Route::post('/bmi/store', [BMIController::class, 'store'])->name('profile.bmi.update');
@@ -32,17 +32,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/health-goal', [HealthGoalController::class, 'show'])->name('health_goals.show');
     Route::put('/profile/health-goal', [HealthGoalController::class, 'update'])->name('health_goals.update');
 
-    // 👤 Profile
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // 🍳 Recipe Generation Flow
+    // Recipe Generation Flow
     Route::get('/generate', [GenerateController::class, 'showForm'])->name('generate');
     Route::post('/generate', [IngredientController::class, 'process'])->name('generate.process');
     Route::get('/generate-result', [IngredientController::class, 'showResult'])->name('generate.result');
 
-    // 🧂 API for frontend Tagify
+    // API for frontend Tagify
     Route::get('/api/ingredients', [IngredientController::class, 'getIngredients']);
 
     // Recipe List and Detail
@@ -80,6 +80,11 @@ Route::middleware(['auth'])->group(function () {
 
             if ($existing && $user) {
                 $recipeId = $existing->id;
+
+                // Auto-remove past meal plans for this user
+                MealPlan::where('user_id', $user->id)
+                ->whereDate('date', '<', now()->toDateString())
+                ->delete();
 
                 $isFavorited = Favorite::where('user_id', $user->id)
                     ->where('recipe_id', $recipeId)
@@ -134,6 +139,11 @@ Route::middleware(['auth'])->group(function () {
         ];
 
         if ($user) {
+            // Auto-remove past meal plans for this user
+            MealPlan::where('user_id', $user->id)
+            ->whereDate('date', '<', now()->toDateString())
+            ->delete();
+
             $isFavorited = Favorite::where('user_id', $user->id)
                 ->where('recipe_id', $recipe->id)
                 ->exists();
@@ -160,8 +170,6 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('recipe.detail');
 
-
-
     // Save/Unsave recipe
     Route::post('/save-recipe', [RecipeController::class, 'saveRecipe'])->name('recipe.save');
     Route::delete('/recipe/unsave/{id}', [RecipeController::class, 'unsaveRecipe'])->name('recipe.unsave');
@@ -179,15 +187,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/meal-plan/{id}', [MealPlanController::class, 'update'])->name('meal-plan.update');
 
     // Notifications mark as read route
-
     Route::patch('/notifications/{notificationId}/mark', [MealPlanController::class, 'markNotificationAsRead'])
         ->middleware('auth')
-        ->name('notifications.mark');  // 👈 THIS is the name Laravel is looking for
-
-
+        ->name('notifications.mark'); 
 });
 
-// 🌐 Landing and OAuth
+// Landing and OAuth
 Route::get('/', fn() => redirect()->route('login'));
 
 Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);
@@ -195,13 +200,12 @@ Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCa
 Route::get('auth/facebook', [SocialAuthController::class, 'redirectToFacebook']);
 Route::get('auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback']);
 
-// 📊 Dashboard
+// Dashboard
 Route::get('/dashboard', fn() => view('dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
 
-// 🔍 Dev-only testing view (optional)
+// Dev-only testing view (optional)
 Route::get('/test-filters', fn() => view('test-filters'));
-
 Route::get('/send-meal-notifications', [NotificationController::class, 'sendTodayMealPlanNotifications']);
 
 

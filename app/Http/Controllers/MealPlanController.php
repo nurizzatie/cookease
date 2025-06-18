@@ -17,41 +17,41 @@ class MealPlanController extends Controller
 {
     // Show meal plan for selected day
    public function index(Request $request)
-{
-    $userId = Auth::id();
+    {
+        $userId = Auth::id();
 
-    // Only show meal plans from today onwards
-    $availableDates = MealPlan::where('user_id', $userId)
-        ->whereDate('date', '>=', Carbon::today())
-        ->orderBy('date')
-        ->pluck('date')
-        ->unique()
-        ->toArray();
+        // Only show meal plans from today onwards
+        $availableDates = MealPlan::where('user_id', $userId)
+            ->whereDate('date', '>=', Carbon::today())
+            ->orderBy('date')
+            ->pluck('date')
+            ->unique()
+            ->toArray();
 
-    // Get selected date from query, else fallback smartly
-    $selectedDate = $request->input('date');
+        // Get selected date from query, else fallback smartly
+        $selectedDate = $request->input('date');
 
-    if (!$selectedDate || !in_array($selectedDate, $availableDates)) {
-        $selectedDate = $availableDates[0] ?? Carbon::today()->toDateString(); // fallback to today if no plans
+        if (!$selectedDate || !in_array($selectedDate, $availableDates)) {
+            $selectedDate = $availableDates[0] ?? Carbon::today()->toDateString(); // fallback to today if no plans
+        }
+
+        // Load meal plans for the selected date
+        $plans = MealPlan::with('recipe')
+            ->where('user_id', $userId)
+            ->whereDate('date', $selectedDate)
+            ->orderBy('meal_type')
+            ->get()
+            ->groupBy('meal_type');
+
+        $recipes = Recipe::all();
+
+        return view('meal_plan.index', [
+            'plans' => $plans,
+            'recipes' => $recipes,
+            'date' => $selectedDate,
+            'availableDates' => $availableDates,
+        ]);
     }
-
-    // Load meal plans for the selected date
-    $plans = MealPlan::with('recipe')
-        ->where('user_id', $userId)
-        ->whereDate('date', $selectedDate)
-        ->orderBy('meal_type')
-        ->get()
-        ->groupBy('meal_type');
-
-    $recipes = Recipe::all();
-
-    return view('meal_plan.index', [
-        'plans' => $plans,
-        'recipes' => $recipes,
-        'date' => $selectedDate,
-        'availableDates' => $availableDates,
-    ]);
-}
 
 
     public function storeMeal(Request $request)

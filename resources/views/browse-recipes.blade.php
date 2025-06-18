@@ -4,6 +4,7 @@
     </x-slot>
 
     <div class="py-12 max-w-7xl mx-auto px-6">
+
         <h3 class="text-xl font-bold mb-6">All Recipes</h3>
 
         <form method="GET" action="{{ route('recipes.browse') }}"

@@ -19,16 +19,16 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $user = $request->user();
-    $bmi = $user->bmi; // assumes User model has a `bmi()` relationship
-    $healthGoal = optional($user->healthGoal)->goal;
-    $calorieTarget = $bmi?->calorie_target;
+        $bmi = $user->bmi; // assumes User model has a `bmi()` relationship
+        $healthGoal = optional($user->healthGoal)->goal;
+        $calorieTarget = $bmi?->calorie_target;
 
-    return view('profile.edit', [
-        'user' => $user,
-        'bmi' => $bmi,
-        'healthGoal' => $healthGoal,
-        'calorieTarget' => $calorieTarget,
-    ]);
+        return view('profile.edit', [
+            'user' => $user,
+            'bmi' => $bmi,
+            'healthGoal' => $healthGoal,
+            'calorieTarget' => $calorieTarget,
+        ]);
     }
 
     /**
@@ -72,10 +72,10 @@ class ProfileController extends Controller
 
 
     public function modify(Request $request): View
-{
-    $user = $request->user();
-    $bmi = $user->bmi; // include BMI relationship
+    {
+        $user = $request->user();
+        $bmi = $user->bmi; // include BMI relationship
 
-    return view('profile.edit', compact('user', 'bmi'));
-}
+        return view('profile.edit', compact('user', 'bmi'));
+    }
 }
