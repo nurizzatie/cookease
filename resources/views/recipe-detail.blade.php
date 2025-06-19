@@ -292,9 +292,6 @@
 
     <!-- Scripts -->
     <script>
-        const groceryItems = @json($recipe['groceryLists']);
-        const groceryText = "CookEase Shopping List:\n\n" + groceryItems.map(item => "- " + item).join("\n");
-
         function printGroceryList() {
             const printable = document.getElementById('printableGroceryList');
             printable.classList.remove('hidden');
@@ -303,17 +300,32 @@
         }
 
         function copyGroceryList() {
-            const textarea = document.getElementById('groceryListText');
-            textarea.value = groceryText;
-            textarea.classList.remove('hidden');
-            textarea.select();
-            document.execCommand('copy');
-            textarea.classList.add('hidden');
+            let groceryItems = @json($recipe['groceryLists']);
 
-            const message = document.getElementById('copyMessage');
-            message.classList.remove('hidden');
-            setTimeout(() => message.classList.add('hidden'), 2000);
+            // If it's a string, try to parse it
+            if (typeof groceryItems === 'string') {
+                try {
+                    groceryItems = JSON.parse(groceryItems);
+                } catch (e) {
+                    console.error('Invalid JSON for groceryItems');
+                    groceryItems = [];
+                }
+            }
+
+            const groceryText = "CookEase Shopping List:\n\n" + groceryItems.map(item => "- " + item).join("\n");
+
+            navigator.clipboard.writeText(groceryText)
+                .then(() => {
+                    const message = document.getElementById('copyMessage');
+                    message.classList.remove('hidden');
+                    setTimeout(() => message.classList.add('hidden'), 2000);
+                })
+                .catch(err => {
+                    console.error('Clipboard error:', err);
+                    alert('Failed to copy to clipboard.');
+                });
         }
+
     </script>
 
 </x-app-layout>
