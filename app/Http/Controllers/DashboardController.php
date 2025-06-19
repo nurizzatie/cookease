@@ -35,6 +35,10 @@ class DashboardController extends Controller
         // Recipes Generated This Week (based on created_at and user’s session or tracking)
         $generatedCount = Recipe::where('created_at', '>=', now()->startOfWeek())->count();
 
+        $weeklyPlans = MealPlan::where('user_id', Auth::id())
+            ->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->count();
+
         // Today's Meal Plan
         $todaysPlans = MealPlan::where('user_id', $user->id)
             ->whereDate('date', today())
@@ -58,7 +62,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'bmi', 'bmiCategory',
-            'todayCalories', 'savedCount', 'generatedCount',
+            'todayCalories', 'savedCount', 'generatedCount', 'weeklyPlans',
             'todaysPlans', 'recentFavorites', 'recommendedRecipes', 'tips', 'apiError'
         ));
     }

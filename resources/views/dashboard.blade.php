@@ -21,28 +21,28 @@
                     <div class="p-4 text-white" style="background-color: #FAD59A"><i class="fa-solid fa-weight-scale fa-3x"></i></div>
                     <div class="px-4 text-gray-700">
                         <h3 class="text-sm tracking-wider">Your BMI</h3>
-                        <p class="text-3xl">{{ $bmiCategory }}</p>
+                        <p class="text-2xl">{{ $bmiCategory }}</p>
                     </div>
                 </div>
                 <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
                     <div class="p-4 text-white" style="background-color: #FADA7A"><i class="fa-solid fa-fire fa-3x"></i></div>
                     <div class="px-4 text-gray-700">
                         <h3 class="text-sm tracking-wider">Calories Intake Today</h3>
-                        <p class="text-3xl">{{ $todayCalories }} kcal</p>
+                        <p class="text-2xl">{{ $todayCalories }} kcal</p>
                     </div>
                 </div>
                 <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
                     <div class="p-4 text-white" style="background-color: #B1C29E"><i class="fa-solid fa-bowl-rice fa-3x"></i></div>
                     <div class="px-4 text-gray-700">
                         <h3 class="text-sm tracking-wider">Saved Recipes</h3>
-                        <p class="text-3xl">{{ $savedCount }}</p>
+                        <p class="text-2xl">{{ $savedCount }}</p>
                     </div>
                 </div>
                 <div class="flex items-center bg-white border rounded-sm overflow-hidden shadow">
-                    <div class="p-4 text-white" style="background-color: #F0A04B"><i class="fa-solid fa-file-arrow-down fa-3x"></i></div>
+                    <div class="p-4 text-white" style="background-color: #F0A04B"><i class="fa-solid fa-table-list fa-3x"></i></div>
                     <div class="px-4 text-gray-700">
-                        <h3 class="text-sm tracking-wider">Recipes Generated</h3>
-                        <p class="text-3xl">{{ $generatedCount }}</p>
+                        <h3 class="text-sm tracking-wider">Meal Plans this Week</h3>
+                        <p class="text-2xl">{{ $weeklyPlans }}</p>
                     </div>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                             <a href="{{ route('recipes.saved') }}" class="text-sm sm:text-base md:text-base text-blue-600 hover:underline">View All</a>
                         </div>
                         <div class="space-y-3 flex-1">
-                        @foreach ($recentFavorites as $recipe)
+                        @forelse ($recentFavorites as $recipe)
                             <div class="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition duration-300">
                                 <a href="{{ route('recipe.detail', $recipe->id) }}">
                                     <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';" class="w-full h-40 sm:h-48 md:h-56 object-cover">
@@ -126,7 +126,9 @@
                                     </div>
                                 </a>
                             </div>
-                        @endforeach
+                            @empty
+                                <p class="text-gray-400 italic">No saved recipes. ✨</p>
+                        @endforelse
                         </div>
                     </div>
                 </div>
