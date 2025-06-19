@@ -122,15 +122,7 @@ class MealPlanController extends Controller
             'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
         ]);
 
-        $existingCount = MealPlan::where('user_id', Auth::id())
-            ->where('date', $request->date)
-            ->where('meal_type', $request->meal_type)
-            ->count();
-
-        if ($existingCount >= 3) {
-            return back()->withErrors(['meal_type' => 'You can only add up to 3 ' . ucfirst($request->meal_type) . ' meals per day.'])->withInput();
-        }
-
+    
         $mealPlan = MealPlan::create([
             'user_id' => Auth::id(),
             'recipe_id' => $request->recipe_id,
@@ -162,17 +154,7 @@ class MealPlanController extends Controller
             'meal_type' => 'required|in:breakfast,lunch,dinner,snack',
         ]);
 
-        $existingCount = MealPlan::where('user_id', Auth::id())
-            ->where('date', $request->date)
-            ->where('meal_type', $request->meal_type)
-            ->count();
 
-        if ($existingCount >= 3) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You can only add up to 3 ' . ucfirst($request->meal_type) . ' meals per day.'
-            ], 422);
-        }
 
         $duplicate = MealPlan::where('user_id', Auth::id())
             ->whereDate('date', $request->date)
