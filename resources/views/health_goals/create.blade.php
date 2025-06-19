@@ -3,14 +3,8 @@
         <h2 class="font-semibold text-xl text-center">Choose Your Health Goal</h2>
     </x-slot>
 
-    <div class="flex items-center justify-center min-h-screen px-4">
+    <div class="flex items-center justify-center py-12 px-4">
         <div class="bg-white shadow-lg rounded-2xl flex flex-col md:w-1/2 p-8 md:p-14 max-w-lg w-full">
-
-            <!-- Logo & Branding -->
-            <div class="mb-6 flex items-center space-x">
-                <img src="{{ asset('images/logo.png') }}" alt="CookEase Logo" class="h-10 w-auto">
-                <span class="text-xl font-bold text-gray-800">CookEase</span>
-            </div>
 
             <!-- Welcome Message -->
             <div class="text-center cursor-default mb-6">
