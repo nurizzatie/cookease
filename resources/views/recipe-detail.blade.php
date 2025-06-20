@@ -21,7 +21,7 @@
 
     <div class="py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div class="bg-white shadow rounded-xl p-6">
-            <img src="{{ $recipe['image'] }}"
+            <img src="{{ asset($recipe['image']) }}"
             onerror="this.onerror=null; this.src='/images/placeholder.jpg';"
             alt="recipe image"
             class="w-full h-64 object-cover rounded mb-6">
