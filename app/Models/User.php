@@ -45,4 +45,26 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function bmi()
+    {
+        return $this->hasOne(Bmi::class)->latestOfMany(); 
+    }
+
+    public function healthGoal()
+    {
+        return $this->hasOne(HealthGoal::class);
+    }
+
+    public function favorites()
+    {
+        return $this->belongsToMany(Recipe::class, 'favorites');
+    }
+
+    public function mealPlans()
+    {
+        return $this->hasMany(MealPlan::class);
+    }
+
 }
+
