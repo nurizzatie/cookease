@@ -18,9 +18,6 @@ COPY . /var/www
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Install JS dependencies and build assets (Tailwind, Alpine, etc.)
-RUN npm install && npm run build
-
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www/storage
 
@@ -28,7 +25,8 @@ RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www/storage
 EXPOSE 8000
 
 # Start Laravel
-CMD php artisan config:clear && \
+CMD npm install && npm run build && \
+    php artisan config:clear && \
     php artisan route:clear && \
     php artisan view:clear && \
     php artisan config:cache && \
