@@ -22,8 +22,7 @@ RUN composer install --optimize-autoloader --no-dev
 RUN npm install && npm run build
 
 # Run storage:link and cache config
-RUN php artisan storage:link && \
-    php artisan config:cache && \
+RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
 
