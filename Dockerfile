@@ -23,7 +23,7 @@ RUN rm -rf node_modules public/build resources/js/.vite
 RUN composer install --optimize-autoloader --no-dev
 
 # Install Node dependencies and build assets
-RUN npm install && npm run build
+RUN npm install
 
 # Set file permissions
 RUN chown -R www-data:www-data /var/www \
@@ -41,4 +41,5 @@ CMD php artisan config:clear && \
     php artisan db:seed --class=RecipeSeeder --force && \
     php artisan db:seed --class=IngredientSeeder --force && \
     php artisan storage:link && \
+    npm run build && \
     php artisan serve --host=0.0.0.0 --port=8000
