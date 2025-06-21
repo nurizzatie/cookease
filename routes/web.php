@@ -4,6 +4,7 @@ use App\Models\Recipe;
 use App\Models\Review;
 use App\Models\Favorite;
 use App\Models\MealPlan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BMIController;
@@ -200,6 +201,18 @@ Route::get('/run-migrations', function () {
     } catch (\Throwable $e) {
         return response()->make(
             "<h2>❌ Error running migration:</h2><pre>" . $e->getMessage() . "</pre><hr><pre>" . $e->getTraceAsString() . "</pre>",
+            500
+        );
+    }
+});
+
+Route::get('/test-db', function () {
+    try {
+        DB::connection()->getPdo();
+        return '✅ Database connection successful!';
+    } catch (\Throwable $e) {
+        return response()->make(
+            "<h2>❌ Database connection failed:</h2><pre>" . $e->getMessage() . "</pre><hr><pre>" . $e->getTraceAsString() . "</pre>",
             500
         );
     }
