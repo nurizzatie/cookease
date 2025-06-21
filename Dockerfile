@@ -1,32 +1,39 @@
-# Use official PHP image with extensions
+# Base PHP image
 FROM php:8.2-fpm
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git curl libpng-dev libonig-dev libxml2-dev zip unzip nodejs npm \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www
 
-# Copy existing application code
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git curl zip unzip libpng-dev libonig-dev libxml2-dev \
+    libzip-dev nodejs npm \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy app code
 COPY . /var/www
+
+# Remove old build artifacts if exist
+RUN rm -rf node_modules public/build resources/js/.vite
 
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www/storage
+# Install Node dependencies and build assets
+RUN npm install && npm run build
+
+# Set file permissions
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage /var/www/bootstrap/cache
 
 # Expose port
 EXPOSE 8000
 
-# Start Laravel
-CMD npm install && npm run build && \
-    php artisan config:clear && \
+# Run migrations, seeders, storage link, and start server
+CMD php artisan config:clear && \
     php artisan route:clear && \
     php artisan view:clear && \
     php artisan config:cache && \
@@ -35,4 +42,3 @@ CMD npm install && npm run build && \
     php artisan db:seed --class=IngredientSeeder --force && \
     php artisan storage:link && \
     php artisan serve --host=0.0.0.0 --port=8000
-
