@@ -6,6 +6,7 @@ use App\Models\Favorite;
 use App\Models\MealPlan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BMIController;
 use Illuminate\Support\Facades\Artisan;
@@ -206,13 +207,26 @@ Route::get('/run-migrations', function () {
     }
 });
 
-Route::get('/test-db-connection', function () {
+Route::get('/check-db', function () {
     try {
         DB::connection()->getPdo();
-        return "✅ Connected to DB: " . DB::connection()->getDatabaseName();
+        return response()->json([
+            'success' => true,
+            'connection' => config('database.default'),
+            'host' => config('database.connections.mysql.host'),
+            'database' => config('database.connections.mysql.database'),
+        ]);
     } catch (\Exception $e) {
-        return "❌ Connection failed: " . $e->getMessage();
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 500);
     }
+});
+
+Route::get('/show-log', function () {
+    $log = File::get(storage_path('logs/laravel.log'));
+    return response("<pre>$log</pre>");
 });
 
 // Landing and OAuth
