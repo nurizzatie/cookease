@@ -206,15 +206,12 @@ Route::get('/run-migrations', function () {
     }
 });
 
-Route::get('/test-db', function () {
+Route::get('/test-db-connection', function () {
     try {
         DB::connection()->getPdo();
-        return '✅ Database connection successful!';
-    } catch (\Throwable $e) {
-        return response()->make(
-            "<h2>❌ Database connection failed:</h2><pre>" . $e->getMessage() . "</pre><hr><pre>" . $e->getTraceAsString() . "</pre>",
-            500
-        );
+        return "✅ Connected to DB: " . DB::connection()->getDatabaseName();
+    } catch (\Exception $e) {
+        return "❌ Connection failed: " . $e->getMessage();
     }
 });
 
