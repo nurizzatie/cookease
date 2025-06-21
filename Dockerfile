@@ -21,15 +21,6 @@ RUN composer install --optimize-autoloader --no-dev
 # Install JS dependencies and build assets (Tailwind, Alpine, etc.)
 RUN npm install && npm run build
 
-# Run storage:link and cache config
-RUN php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan route:clear && \
-    php artisan view:clear && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache
-
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www/storage
 
@@ -37,5 +28,13 @@ RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www/storage
 EXPOSE 8000
 
 # Start Laravel
-CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --class=RecipeSeeder --force && php artisan db:seed --class=IngredientSeeder --force && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=8000"]
+CMD php artisan config:clear && \
+    php artisan route:clear && \
+    php artisan view:clear && \
+    php artisan config:cache && \
+    php artisan migrate --force && \
+    php artisan db:seed --class=RecipeSeeder --force && \
+    php artisan db:seed --class=IngredientSeeder --force && \
+    php artisan storage:link && \
+    php artisan serve --host=0.0.0.0 --port=8000
 
