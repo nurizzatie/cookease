@@ -196,9 +196,12 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/run-migrations', function () {
     try {
         Artisan::call('migrate', ['--force' => true]);
-        return '✅ Migration complete!';
-    } catch (\Exception $e) {
-        return '❌ Error: ' . $e->getMessage();
+        return Artisan::output();  // Show artisan output directly
+    } catch (\Throwable $e) {
+        return response()->make(
+            "<h2>❌ Error running migration:</h2><pre>" . $e->getMessage() . "</pre><hr><pre>" . $e->getTraceAsString() . "</pre>",
+            500
+        );
     }
 });
 
