@@ -19,7 +19,10 @@ class DashboardController extends Controller
 
         // BMI
         $bmiRecord = $user->bmi;
-        $bmi = $bmiRecord ? number_format($bmiRecord->getBmiAttribute(), 1) : null;
+        //$bmi = $bmiRecord ? number_format($bmiRecord->getBmiAttribute(), 1) : null;
+        $bmiRaw = $bmiRecord?->getBmiAttribute();
+        $bmi = $bmiRaw ? number_format($bmiRaw, 1) : 'N/A';
+
         $bmiCategory = $bmiRecord ? $bmiRecord->getBmiCategory() : 'N/A';
 
         // Calories Intake Today
@@ -61,9 +64,17 @@ class DashboardController extends Controller
         $tips = $this->generateDailyCookingTips($apiError);
 
         return view('dashboard', compact(
-            'bmi', 'bmiCategory',
-            'todayCalories', 'savedCount', 'generatedCount', 'weeklyPlans',
-            'todaysPlans', 'recentFavorites', 'recommendedRecipes', 'tips', 'apiError'
+            'bmi',
+            'bmiCategory',
+            'todayCalories',
+            'savedCount',
+            'generatedCount',
+            'weeklyPlans',
+            'todaysPlans',
+            'recentFavorites',
+            'recommendedRecipes',
+            'tips',
+            'apiError'
         ));
     }
 
@@ -74,13 +85,13 @@ class DashboardController extends Controller
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type'  => 'application/json',
+                'Content-Type' => 'application/json',
             ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
-                'messages' => [
-                    ['role' => 'user', 'content' => 'Give 3 simple daily cooking tips. Return only array of strings.'],
-                ],
-            ]);
+                        'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
+                        'messages' => [
+                            ['role' => 'user', 'content' => 'Give 3 simple daily cooking tips. Return only array of strings.'],
+                        ],
+                    ]);
 
             $json = $response->json();
             $content = $json['choices'][0]['message']['content'] ?? '[]';
