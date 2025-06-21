@@ -1,39 +1,37 @@
-# Use the official PHP image with necessary extensions
+# Base PHP image
 FROM php:8.2-fpm
+
+# Set working directory
+WORKDIR /var/www
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libonig-dev libxml2-dev \
-    libzip-dev libonig-dev libcurl4-openssl-dev \
-    nodejs npm \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+    libzip-dev nodejs npm \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set the working directory
-WORKDIR /var/www
+# Copy app code
+COPY . /var/www
 
-# Copy app files
-COPY . .
-
-# Clear previous node modules/build cache if any
+# Remove old build artifacts if exist
 RUN rm -rf node_modules public/build resources/js/.vite
 
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Install Node.js dependencies and compile assets with Vite
+# Install dependencies
 RUN npm install && npm run build
 
-# Set permissions for Laravel directories
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage /var/www/bootstrap/cache
+# Optional: check assets are created (this shows up in logs)
+RUN ls -la public/build
 
-# Expose the app port
-EXPOSE 8000
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www/storage
 
-# Run Laravel app with pre-migrate & asset link
+# Final startup commands
 CMD php artisan config:clear && \
     php artisan route:clear && \
     php artisan view:clear && \
