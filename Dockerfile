@@ -34,4 +34,5 @@ RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www/storage
 EXPOSE 8000
 
 # Start Laravel
-CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"]
+CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --class=RecipeSeeder --force && php artisan db:seed --class=IngredientSeeder --force && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=8000"]
+
