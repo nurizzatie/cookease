@@ -207,28 +207,6 @@ Route::get('/run-migrations', function () {
     }
 });
 
-Route::get('/check-db', function () {
-    try {
-        DB::connection()->getPdo();
-        return response()->json([
-            'success' => true,
-            'connection' => config('database.default'),
-            'host' => config('database.connections.mysql.host'),
-            'database' => config('database.connections.mysql.database'),
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-        ], 500);
-    }
-});
-
-Route::get('/show-log', function () {
-    $log = File::get(storage_path('logs/laravel.log'));
-    return response("<pre>$log</pre>");
-});
-
 // Landing and OAuth
 Route::get('/', fn() => redirect()->route('login'));
 
