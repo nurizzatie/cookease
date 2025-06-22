@@ -75,10 +75,6 @@
                         <img src="{{ asset('images/google-icon.png') }}" alt="Google" class="w-5 h-5 object-contain">
                         <span>Login with Google</span>
                     </a>
-                    <a href="{{ url('auth/facebook') }}" class="flex items-center justify-center text-black text-sm font-medium px-4 py-2 gap-2">
-                        <img src="{{ asset('images/Facebook-Logo.png') }}" alt="Facebook" class="w-5 h-5 object-contain">
-                        <span>Login with Facebook</span>
-                    </a>
                 </div>
 
                 <!-- Register Link -->
