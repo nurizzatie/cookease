@@ -212,8 +212,6 @@ Route::get('/', fn() => redirect()->route('login'));
 
 Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
-Route::get('auth/facebook', [SocialAuthController::class, 'redirectToFacebook']);
-Route::get('auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback']);
 
 // Dashboard
 Route::get('/dashboard', fn() => view('dashboard'))->middleware(['auth', 'verified'])->name('dashboard');

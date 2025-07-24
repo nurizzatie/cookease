@@ -20,18 +20,6 @@ class SocialAuthController extends Controller
         return $user->bmi ? redirect()->route('dashboard') : redirect()->route('bmi.form');
     }
 
-    public function redirectToFacebook() {
-        return Socialite::driver('facebook')->redirect();
-    }
-
-    public function handleFacebookCallback() {
-        $socialUser = Socialite::driver('facebook')->user();
-        $user = $this->loginOrRegisterUser($socialUser);
-        
-
-       return $user->bmi ? redirect()->route('dashboard') : redirect()->route('bmi.form');
-    }
-
     protected function loginOrRegisterUser($socialUser) {
         $user = User::firstOrCreate(
             ['email' => $socialUser->getEmail()],
